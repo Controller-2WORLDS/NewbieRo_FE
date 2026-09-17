@@ -19,17 +19,25 @@ export interface RiskSegment {
   road_name: string;
   accident_count: number;
   severity_score: number;
+  lat: number;
+  lng: number;
 }
 
 export interface RestArea {
   rest_area_name: string;
   predicted_occupancy_rate: number;
+  lat: number;
+  lng: number;
 }
 
 export interface RouteQuery {
   origin: string;
   destination: string;
   requested_at: string;
+  origin_lat?: number;
+  origin_lng?: number;
+  destination_lat: number;
+  destination_lng: number;
 }
 
 export interface DriveAlert {
