@@ -1,4 +1,3 @@
-import React from "react"
 import { motion } from "framer-motion"
 import type { RiskSegment } from "../../types/newbiero"
 import { riskLevel } from "../../utils/newbiero"

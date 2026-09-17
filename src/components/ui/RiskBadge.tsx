@@ -1,9 +1,7 @@
-import React from "react"
 import type { RiskLevel } from "../../types/newbiero"
 import { riskLevel } from "../../utils/newbiero"
 
 interface RiskBadgeProps {
-    /** Raw risk_score — never rendered as a number, only mapped to a level. */
     score?: number
     level?: RiskLevel
     size?: "sm" | "md"

@@ -1,9 +1,7 @@
-import React from "react"
 import type { CongestionLevel } from "../../types/newbiero"
 import { congestionLevel } from "../../utils/newbiero"
 
 interface CongestionBadgeProps {
-    /** predicted_occupancy_rate — never rendered as a number. */
     rate?: number
     level?: CongestionLevel
     size?: "sm" | "md"
