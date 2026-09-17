@@ -41,7 +41,7 @@ export function AlertBanner({ road_name, severity_score, alert_type }: AlertBann
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.26, ease: [0.23, 1, 0.32, 1] }}
             role="status"
-            style={{ boxShadow: `var(--shadow-lifted), ${tone.glow}` }}
+            style={{ boxShadow: `var(--elevation-lifted), ${tone.glow}` }}
             className="relative flex items-center gap-2.5 overflow-hidden rounded-btn border border-line-soft bg-surface/90 py-2.5 pl-2.5 pr-3.5 backdrop-blur-xl"
         >
             <span aria-hidden="true" className={["pointer-events-none absolute inset-0", tone.wash].join(" ")} />
