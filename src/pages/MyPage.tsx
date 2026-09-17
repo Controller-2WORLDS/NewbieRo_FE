@@ -95,7 +95,7 @@ export function MyPage() {
                         <span className="flex-1 text-[15px] font-medium text-ink">다크 모드</span>
                         <span
                             className={[
-                                "relative h-6.5 w-11.5 rounded-full transition-colors duration-200 ease-out",
+                                "relative h-6.5 w-11.5 rounded-full transition-colors duration-300 ease-out",
                                 mode === "dark"
                                     ? "bg-grad-navy shadow-navy"
                                     : "bg-surface-2 border border-line-soft shadow-[inset_0_1px_3px_rgba(23,43,77,0.05)]",
@@ -105,7 +105,7 @@ export function MyPage() {
                             <span
                                 className={[
                                     "absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-card",
-                                    "transition-[left] duration-200 ease-out",
+                                    "transition-[left] duration-300 ease-out",
                                     mode === "dark" ? "left-5.75" : "left-0.75",
                                 ].join(" ")}
                             />
