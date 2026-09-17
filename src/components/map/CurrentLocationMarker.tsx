@@ -1,19 +1,16 @@
 import { motion } from "framer-motion"
+import { CustomOverlayMap } from "react-kakao-maps-sdk"
+import type { LatLng } from "../../lib/kakao"
 
 interface CurrentLocationMarkerProps {
-    x?: number
-    y?: number
+    position: LatLng
     variant?: "dot" | "puck"
 }
 
-export function CurrentLocationMarker({ x = 50, y = 58, variant = "dot" }: CurrentLocationMarkerProps) {
+export function CurrentLocationMarker({ position, variant = "dot" }: CurrentLocationMarkerProps) {
     return (
-        <div
-            className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-            style={{ left: `${x}%`, top: `${y}%` }}
-            aria-hidden="true"
-        >
-            <div className="relative flex items-center justify-center">
+        <CustomOverlayMap position={position} zIndex={15}>
+            <div className="relative flex items-center justify-center" aria-hidden="true">
                 <motion.span
                     animate={{ scale: [1, 2.6], opacity: [0.24, 0] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
@@ -43,6 +40,6 @@ export function CurrentLocationMarker({ x = 50, y = 58, variant = "dot" }: Curre
                     </span>
                 )}
             </div>
-        </div>
+        </CustomOverlayMap>
     )
 }

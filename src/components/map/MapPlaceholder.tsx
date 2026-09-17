@@ -1,131 +1,166 @@
 import React from "react"
-import { motion } from "framer-motion"
-import { useTheme } from "../../contexts/ThemeContext"
+import { MinusIcon, PlusIcon } from "lucide-react"
+import { Map, Polyline, Circle, useKakaoLoader } from "react-kakao-maps-sdk"
+import { KAKAO_MAP_APP_KEY, type LatLng } from "../../lib/kakao"
+import { cn } from "../../lib/cn"
 
-const MAP_LIGHT = "/08516cf1-f7c9-476e-ac11-243bbf08554f.jpg"
-
-const MAP_DARK = "/5083dd3f-c339-4625-87a2-efff047614b3.jpg"
-
-const MAP_NAV = "/ea460eec-3ddc-4f71-ae26-cfccb7519a77.jpg"
+interface HeatSpot {
+    position: LatLng
+    radius: number
+    tone: string
+    opacity?: number
+}
 
 interface MapPlaceholderProps {
     children?: React.ReactNode
     className?: string
-    heatmap?: boolean
-    showRoute?: boolean
-    variant?: "top" | "nav"
-    moving?: boolean
+    /** 위험구간 반경 원(들). 실제 위험구간 좌표 기반으로 호출부에서 계산해 전달. */
+    heatSpots?: HeatSpot[]
+    /** 경로 표시용 좌표 목록(직선 연결 — 실제 경로 엔진 연동 전 임시 표시). */
+    routePath?: LatLng[]
+    /** 주어지면 center/level 대신 이 좌표들이 모두 보이도록 자동으로 화면을 맞춘다. */
+    fitBounds?: LatLng[]
+    center: LatLng
+    level?: number
+    zoomControl?: boolean
     label?: string
+    onCreate?: (map: kakao.maps.Map) => void
 }
-
-const heatSpots = [
-    { cx: 118, cy: 176, r: 60, tone: "var(--danger-vivid)", opacity: 0.32 },
-    { cx: 246, cy: 268, r: 72, tone: "var(--caution-vivid)", opacity: 0.28 },
-    { cx: 176, cy: 408, r: 56, tone: "var(--caution-vivid)", opacity: 0.22 },
-    { cx: 300, cy: 468, r: 48, tone: "var(--safe-vivid)", opacity: 0.2 },
-]
-
-const TOP_ROUTE = "M64 556 L64 430 L172 430 L172 268 L262 268 L262 120 L330 120 L330 44"
-const NAV_ROUTE = "M196 600 L196 470 L186 330 L176 232 L186 150"
 
 export function MapPlaceholder({
     children,
     className = "",
-    heatmap = false,
-    showRoute = false,
-    variant = "top",
-    moving = false,
+    heatSpots,
+    routePath,
+    fitBounds,
+    center,
+    level = 5,
+    zoomControl = false,
     label = "지도",
+    onCreate,
 }: MapPlaceholderProps) {
-    const { mode } = useTheme()
-    const [imageFailed, setImageFailed] = React.useState(false)
-    const src = variant === "nav" ? MAP_NAV : mode === "dark" ? MAP_DARK : MAP_LIGHT
-    const routePath = variant === "nav" ? NAV_ROUTE : TOP_ROUTE
+    const [loading, error] = useKakaoLoader({
+        appkey: KAKAO_MAP_APP_KEY,
+        libraries: ["services"],
+    })
+    const mapRef = React.useRef<kakao.maps.Map | null>(null)
+
+    const zoomBy = (delta: number) => {
+        const map = mapRef.current
+        if (!map) return
+        map.setLevel(map.getLevel() + delta, { animate: true })
+    }
+
+    if (!KAKAO_MAP_APP_KEY) {
+        return (
+            <div
+                role="img"
+                aria-label={label}
+                className={cn("relative flex items-center justify-center bg-map-base p-4 text-center", className)}
+            >
+                <p className="text-[13px] font-medium text-ink-3">
+                    지도를 표시하려면 .env에 VITE_KAKAO_MAP_APP_KEY를 설정하세요.
+                </p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div
+                role="img"
+                aria-label={label}
+                className={cn("relative flex items-center justify-center bg-map-base p-4 text-center", className)}
+            >
+                <p className="text-[13px] font-medium text-ink-3">지도를 불러오지 못했습니다.</p>
+            </div>
+        )
+    }
+
+    if (loading) {
+        return (
+            <div
+                role="img"
+                aria-label={label}
+                className={cn("relative animate-pulse overflow-hidden bg-map-base", className)}
+            />
+        )
+    }
 
     return (
-        <div role="img" aria-label={label} className={["relative overflow-hidden bg-map-base", className].join(" ")}>
-            {moving ? (
-                <motion.img
-                    src={src}
-                    alt=""
-                    onError={() => setImageFailed(true)}
-                    animate={{ y: ["0%", "-14%"] }}
-                    transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                    className="absolute left-0 top-0 h-[125%] w-full object-cover"
-                />
-            ) : (
-                <img
-                    src={src}
-                    alt=""
-                    onError={() => setImageFailed(true)}
-                    className="absolute inset-0 h-full w-full object-cover"
-                />
-            )}
-
-            {mode === "dark" && variant === "nav" ? (
-                <div className="absolute inset-0 bg-[#0f1216]/72" aria-hidden="true" />
-            ) : null}
-
-            <svg
-                viewBox="0 0 390 600"
-                preserveAspectRatio="xMidYMid slice"
-                className="absolute inset-0 h-full w-full"
-                aria-hidden="true"
+        <div role="img" aria-label={label} className={cn("relative overflow-hidden bg-map-base", className)}>
+            <Map
+                center={center}
+                // fitBounds가 있으면 setBounds가 확대수준을 정하게 두고, 여기서는 level을 지정하지
+                // 않는다 — react-kakao-maps-sdk는 level prop이 undefined면 자체 setLevel 동기화
+                // effect를 건너뛰므로, 이 값을 넘기면 매 마운트마다 setBounds 직후 level을 이 값으로
+                // 되돌려버린다.
+                level={fitBounds && fitBounds.length > 1 ? undefined : level}
+                className="h-full w-full"
+                onCreate={(map) => {
+                    mapRef.current = map
+                    if (fitBounds && fitBounds.length > 1) {
+                        // react-kakao-maps-sdk도 같은 커밋에서 center를 prop 값으로 동기화하는
+                        // effect를 (onCreate 이후 순서로) 실행하므로, setBounds를 바로 호출하면
+                        // 그 동기화 effect가 곧장 되돌려버린다. 이번 커밋의 동기화가 끝난 다음
+                        // tick으로 미뤄서 setBounds가 마지막에 적용되게 한다.
+                        window.setTimeout(() => {
+                            const bounds = new kakao.maps.LatLngBounds()
+                            fitBounds.forEach((point) => bounds.extend(new kakao.maps.LatLng(point.lat, point.lng)))
+                            map.setBounds(bounds, 48, 48, 48, 48)
+                        }, 0)
+                    }
+                    onCreate?.(map)
+                }}
             >
-                {imageFailed ? (
-                    <g stroke="var(--map-road)" strokeLinecap="round" fill="none">
-                        <path d="M-20 120 H410" strokeWidth="14" />
-                        <path d="M-20 330 H410" strokeWidth="10" />
-                        <path d="M-20 505 H410" strokeWidth="12" />
-                        <path d="M92 -20 V620" strokeWidth="12" />
-                        <path d="M262 -20 V620" strokeWidth="9" />
-                        <path d="M-20 -10 L200 210 L200 620" strokeWidth="7" />
-                        <path d="M410 60 L250 220 L120 220" strokeWidth="6" />
-                        <g strokeWidth="3" opacity="0.6">
-                            <path d="M-20 215 H410" />
-                            <path d="M-20 420 H410" />
-                            <path d="M172 -20 V620" />
-                            <path d="M330 -20 V620" />
-                        </g>
-                    </g>
+                {heatSpots?.map((spot, index) => (
+                    <Circle
+                        key={index}
+                        center={spot.position}
+                        radius={spot.radius}
+                        fillColor={spot.tone}
+                        fillOpacity={spot.opacity ?? 0.28}
+                        strokeOpacity={0}
+                    />
+                ))}
+
+                {routePath && routePath.length > 1 ? (
+                    <>
+                        <Polyline path={routePath} strokeColor="#2f6feb" strokeOpacity={0.2} strokeWeight={14} />
+                        <Polyline path={routePath} strokeColor="#2f6feb" strokeWeight={5} />
+                    </>
                 ) : null}
 
-                {heatmap
-                    ? heatSpots.map((spot, index) => (
-                          <circle
-                              key={index}
-                              cx={spot.cx}
-                              cy={spot.cy}
-                              r={spot.r}
-                              fill={spot.tone}
-                              opacity={spot.opacity}
-                              style={{ filter: "blur(14px)" }}
-                          />
-                      ))
-                    : null}
-
-                {showRoute ? (
-                    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-                        <path
-                            d={routePath}
-                            stroke="var(--navy)"
-                            strokeOpacity="0.2"
-                            strokeWidth={variant === "nav" ? 24 : 14}
-                        />
-
-                        <path d={routePath} stroke="var(--navy)" strokeWidth={variant === "nav" ? 12 : 5} />
-                    </g>
-                ) : null}
-            </svg>
+                {children}
+            </Map>
 
             <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-grad-scrim-top" />
-
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-grad-scrim-bottom"
             />
 
-            {children}
+            {zoomControl ? (
+                <div className="absolute bottom-4 right-4 z-20 flex flex-col overflow-hidden rounded-btn border border-line-soft bg-grad-sheen shadow-lifted backdrop-blur-xl">
+                    <button
+                        type="button"
+                        onClick={() => zoomBy(-1)}
+                        aria-label="지도 확대"
+                        className="flex h-10 w-10 items-center justify-center text-ink transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+                    >
+                        <PlusIcon className="h-4.5 w-4.5" strokeWidth={2.2} />
+                    </button>
+                    <span className="h-px bg-line" aria-hidden="true" />
+                    <button
+                        type="button"
+                        onClick={() => zoomBy(1)}
+                        aria-label="지도 축소"
+                        className="flex h-10 w-10 items-center justify-center text-ink transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+                    >
+                        <MinusIcon className="h-4.5 w-4.5" strokeWidth={2.2} />
+                    </button>
+                </div>
+            ) : null}
         </div>
     )
 }
