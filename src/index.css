@@ -1,0 +1,134 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css");
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+:root {
+    --canvas: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f5f9;
+    --line: #eaedf3;
+    --line-soft: rgba(23, 43, 77, 0.05);
+    --line-strong: #d9dee8;
+    --ink: #12151b;
+    --ink-2: #656d7b;
+    --ink-3: #99a0ad;
+    --navy: #2f6feb;
+    --navy-soft: #6797f2;
+    --navy-tint: #eff5ff;
+    --on-navy: #ffffff;
+    --accent: #eaa815;
+    --safe: #12a053;
+    --safe-vivid: #22c55e;
+    --safe-tint: #e9fbf0;
+    --caution: #cc7a00;
+    --caution-vivid: #ffb020;
+    --caution-tint: #fff5e2;
+    --danger: #dc3a3a;
+    --danger-vivid: #f04452;
+    --danger-tint: #ffeced;
+    --map-base: #eef0f4;
+    --map-road: #dadde4;
+    /* Gradients — bright blue, tone on tone */
+    --grad-navy: linear-gradient(180deg, #3b82f6 0%, #2f6feb 100%);
+    --grad-navy-soft: linear-gradient(160deg, rgba(47, 111, 235, 0.08) 0%, rgba(47, 111, 235, 0.02) 100%);
+    --grad-navy-pill: linear-gradient(180deg, rgba(47, 111, 235, 0.12) 0%, rgba(47, 111, 235, 0.04) 100%);
+    --grad-surface: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+    --grad-canvas: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+    --grad-header: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    --grad-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(252, 253, 255, 0.9) 100%);
+    --grad-safe: linear-gradient(180deg, rgba(34, 197, 94, 0.22) 0%, rgba(34, 197, 94, 0.08) 100%);
+    --grad-caution: linear-gradient(180deg, rgba(255, 176, 32, 0.26) 0%, rgba(255, 176, 32, 0.09) 100%);
+    --grad-danger: linear-gradient(180deg, rgba(240, 68, 82, 0.22) 0%, rgba(240, 68, 82, 0.08) 100%);
+    --grad-scrim-top: linear-gradient(180deg, rgba(23, 43, 77, 0.08) 0%, rgba(23, 43, 77, 0) 100%);
+    --grad-scrim-bottom: linear-gradient(0deg, rgba(23, 43, 77, 0.09) 0%, rgba(23, 43, 77, 0) 100%);
+    /* Elevation — light, blue-tinted, at most two soft layers */
+    --shadow-card: 0 1px 2px rgba(23, 43, 77, 0.035), 0 8px 18px -14px rgba(23, 43, 77, 0.08);
+    --shadow-float: 0 1px 2px rgba(23, 43, 77, 0.04), 0 10px 22px -16px rgba(23, 43, 77, 0.12);
+    --shadow-lifted: 0 2px 5px rgba(23, 43, 77, 0.05), 0 14px 28px -18px rgba(23, 43, 77, 0.14);
+    --shadow-modal: 0 2px 6px rgba(23, 43, 77, 0.05), 0 22px 44px -26px rgba(23, 43, 77, 0.18);
+    --shadow-tabbar: 0 -1px 2px rgba(23, 43, 77, 0.03), 0 -12px 26px -22px rgba(23, 43, 77, 0.12);
+    --shadow-navy: 0 1px 2px rgba(47, 111, 235, 0.14), 0 10px 20px -14px rgba(47, 111, 235, 0.28);
+    --shadow-navy-pressed: 0 1px 2px rgba(47, 111, 235, 0.16), 0 4px 8px -8px rgba(47, 111, 235, 0.2);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    --shadow-inset-navy: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.dark {
+    --canvas: #0e1116;
+    --surface: #171b22;
+    --surface-2: #1f242d;
+    --line: #262c36;
+    --line-soft: rgba(255, 255, 255, 0.055);
+    --line-strong: #363d49;
+    --ink: #e9ebef;
+    --ink-2: #a5acb8;
+    --ink-3: #757d89;
+    --navy: #7fa9ff;
+    --navy-soft: #6f9bf5;
+    --navy-tint: rgba(127, 169, 255, 0.14);
+    --on-navy: #0b1424;
+    --accent: #f0bd4a;
+    --safe: #4ade80;
+    --safe-vivid: #4ade80;
+    --safe-tint: rgba(74, 222, 128, 0.16);
+    --caution: #ffc44d;
+    --caution-vivid: #ffc44d;
+    --caution-tint: rgba(255, 196, 77, 0.16);
+    --danger: #ff7a84;
+    --danger-vivid: #ff7a84;
+    --danger-tint: rgba(255, 122, 132, 0.16);
+    --map-base: #171c23;
+    --map-road: #2b323c;
+    --grad-navy: linear-gradient(180deg, #93b8ff 0%, #6f9bf5 100%);
+    --grad-navy-soft: linear-gradient(160deg, rgba(127, 169, 255, 0.14) 0%, rgba(127, 169, 255, 0.04) 100%);
+    --grad-navy-pill: linear-gradient(180deg, rgba(127, 169, 255, 0.18) 0%, rgba(127, 169, 255, 0.05) 100%);
+    --grad-surface: linear-gradient(180deg, #1a1f27 0%, #16191f 100%);
+    --grad-canvas: linear-gradient(180deg, #121620 0%, #0d1014 100%);
+    --grad-header: linear-gradient(180deg, #1b2028 0%, #16191f 100%);
+    --grad-sheen: linear-gradient(180deg, rgba(27, 32, 40, 0.95) 0%, rgba(21, 25, 31, 0.88) 100%);
+    --grad-safe: linear-gradient(180deg, rgba(74, 222, 128, 0.24) 0%, rgba(74, 222, 128, 0.08) 100%);
+    --grad-caution: linear-gradient(180deg, rgba(255, 196, 77, 0.24) 0%, rgba(255, 196, 77, 0.08) 100%);
+    --grad-danger: linear-gradient(180deg, rgba(255, 122, 132, 0.24) 0%, rgba(255, 122, 132, 0.08) 100%);
+    --grad-scrim-top: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%);
+    --grad-scrim-bottom: linear-gradient(0deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0) 100%);
+    --shadow-card: 0 1px 2px rgba(3, 6, 12, 0.35), 0 8px 18px -14px rgba(3, 6, 12, 0.45);
+    --shadow-float: 0 1px 3px rgba(3, 6, 12, 0.4), 0 12px 24px -16px rgba(3, 6, 12, 0.5);
+    --shadow-lifted: 0 2px 5px rgba(3, 6, 12, 0.45), 0 16px 30px -18px rgba(3, 6, 12, 0.55);
+    --shadow-modal: 0 3px 8px rgba(3, 6, 12, 0.45), 0 26px 48px -26px rgba(3, 6, 12, 0.6);
+    --shadow-tabbar: 0 -1px 2px rgba(3, 6, 12, 0.35), 0 -12px 26px -22px rgba(3, 6, 12, 0.45);
+    --shadow-navy: 0 1px 2px rgba(3, 6, 12, 0.35), 0 10px 20px -14px rgba(111, 155, 245, 0.3);
+    --shadow-navy-pressed: 0 1px 2px rgba(3, 6, 12, 0.35), 0 4px 10px -8px rgba(111, 155, 245, 0.26);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --shadow-inset-navy: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+html,
+body,
+#root {
+    height: 100%;
+}
+body {
+    margin: 0;
+    font-family:
+        "Pretendard Variable",
+        Pretendard,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Apple SD Gothic Neo",
+        system-ui,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+}
+/* Hide scrollbars inside the phone viewport for an app-like feel */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
