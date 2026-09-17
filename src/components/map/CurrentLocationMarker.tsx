@@ -32,16 +32,16 @@ export function CurrentLocationMarker({
         {variant === 'dot' ?
         <span
           style={{ boxShadow: '0 4px 12px -6px rgba(47,111,235,0.45)' }}
-          className="relative h-[18px] w-[18px] rounded-full border-[3px] border-white bg-grad-navy" /> :
+          className="relative h-4.5 w-4.5 rounded-full border-[3px] border-white bg-grad-navy" /> :
 
 
         <span
           style={{ boxShadow: '0 8px 18px -10px rgba(47,111,235,0.5)' }}
-          className="relative flex h-[40px] w-[40px] items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-grad-navy">
+          className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-grad-navy">
           
             <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/35 to-transparent" />
+            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-linear-to-b from-white/35 to-transparent" />
           
             <svg viewBox="0 0 24 24" className="relative h-4 w-4" fill="#ffffff">
               <path d="M12 4 L19 20 L12 16.4 L5 20 Z" />

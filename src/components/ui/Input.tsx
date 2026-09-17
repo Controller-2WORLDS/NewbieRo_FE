@@ -27,7 +27,7 @@ export function Input({
       </label>
       <div
         className={[
-        'flex h-[52px] items-center gap-2.5 rounded-btn border bg-grad-surface px-3.5',
+        'flex h-13 items-center gap-2.5 rounded-btn border bg-grad-surface px-3.5',
         'shadow-[inset_0_1px_2px_rgba(23,43,77,0.03)]',
         'transition-[border-color,box-shadow] duration-200 ease-out',
         error ?

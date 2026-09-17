@@ -75,9 +75,9 @@ export function MapMarker({
           
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent" />
+            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-linear-to-b from-white/30 to-transparent" />
           
-          <Icon className="relative h-[18px] w-[18px]" strokeWidth={2.1} />
+          <Icon className="relative h-4.5 w-4.5" strokeWidth={2.1} />
         </button>
       </div>
     </motion.div>);

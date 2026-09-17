@@ -140,7 +140,7 @@ export function InteractiveMap({
           aria-label="지도 확대"
           className="flex h-10 w-10 items-center justify-center text-ink transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy">
           
-          <PlusIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+          <PlusIcon className="h-4.5 w-4.5" strokeWidth={2.2} />
         </button>
         <span className="h-px bg-line" aria-hidden="true" />
         <button
@@ -149,7 +149,7 @@ export function InteractiveMap({
           aria-label="지도 축소"
           className="flex h-10 w-10 items-center justify-center text-ink transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy">
           
-          <MinusIcon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+          <MinusIcon className="h-4.5 w-4.5" strokeWidth={2.2} />
         </button>
       </div>
     </div>);

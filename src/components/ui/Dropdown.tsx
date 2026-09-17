@@ -66,7 +66,7 @@ export function Dropdown<T extends string>({
           exit={{ opacity: 0, y: -4 }}
           transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
           className={[
-          'absolute top-[42px] z-30 min-w-[132px] overflow-hidden rounded-[16px] border border-line bg-grad-surface p-1 shadow-float-inset backdrop-blur-xl',
+          'absolute top-10.5 z-30 min-w-33 overflow-hidden rounded-[16px] border border-line bg-grad-surface p-1 shadow-float-inset backdrop-blur-xl',
           align === 'right' ? 'right-0' : 'left-0'].
           join(' ')}>
           

@@ -24,7 +24,7 @@ export function MapTooltip({ road_name, accident_count }: MapTooltipProps) {
       </p>
       <span
         aria-hidden="true"
-        className="absolute -bottom-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-b border-r border-line bg-surface" />
+        className="absolute -bottom-1.25 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-b border-r border-line bg-surface" />
       
     </motion.div>);
 

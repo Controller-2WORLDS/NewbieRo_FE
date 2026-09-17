@@ -51,7 +51,7 @@ export function AlertBanner({ road_name, severity_score, alert_type }: AlertBann
                     "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface shadow-card",
                 ].join(" ")}
             >
-                <AlertTriangleIcon className={["h-[18px] w-[18px]", tone.text].join(" ")} strokeWidth={2.2} />
+                <AlertTriangleIcon className={["h-4.5 w-4.5", tone.text].join(" ")} strokeWidth={2.2} />
             </span>
 
             <span className="relative min-w-0 flex-1">
@@ -61,13 +61,13 @@ export function AlertBanner({ road_name, severity_score, alert_type }: AlertBann
                 </span>
             </span>
 
-            <span className="relative flex shrink-0 items-end gap-[3px]" aria-hidden="true">
+            <span className="relative flex shrink-0 items-end gap-0.75" aria-hidden="true">
                 {[0, 1, 2].map((index) => (
                     <span
                         key={index}
                         className={[
-                            "w-[4px] rounded-full",
-                            index === 0 ? "h-2.5" : index === 1 ? "h-4" : "h-[22px]",
+                            "w-1 rounded-full",
+                            index === 0 ? "h-2.5" : index === 1 ? "h-4" : "h-5.5",
                             index < filled ? tone.bar : "bg-surface-2",
                         ].join(" ")}
                     />

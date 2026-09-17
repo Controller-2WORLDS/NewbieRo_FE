@@ -11,7 +11,7 @@ export function Card({ children, className = '', as = 'div' }: CardProps) {
   return (
     <Tag
       className={[
-      'rounded-card border border-line-soft bg-grad-surface p-[18px] shadow-card-inset',
+      'rounded-card border border-line-soft bg-grad-surface p-4.5 shadow-card-inset',
       className].
       join(' ')}>
       

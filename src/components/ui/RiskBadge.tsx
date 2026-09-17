@@ -27,7 +27,7 @@ export function RiskBadge({ score, level, size = "sm" }: RiskBadgeProps) {
         <span
             className={[
                 "inline-flex items-center justify-center gap-1.5 rounded-full font-semibold shadow-inset",
-                size === "sm" ? "h-[26px] pl-2 pr-2.5 text-[12px]" : "h-8 pl-2.5 pr-3.5 text-[14px]",
+                size === "sm" ? "h-6.5 pl-2 pr-2.5 text-[12px]" : "h-8 pl-2.5 pr-3.5 text-[14px]",
                 levelClasses[resolved],
             ].join(" ")}
         >

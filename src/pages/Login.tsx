@@ -33,7 +33,7 @@ export function Login() {
         <main className="flex h-full min-h-0 flex-col overflow-y-auto no-scrollbar px-5 pb-8">
             <header className="sticky top-0 z-20 -mx-5 flex h-14 items-center border-b border-line-soft bg-grad-header px-5 shadow-card backdrop-blur-xl">
                 <span className="flex items-center gap-2">
-                    <NavigationIcon className="h-[18px] w-[18px] text-navy" strokeWidth={2.2} aria-hidden="true" />
+                    <NavigationIcon className="h-4.5 w-4.5 text-navy" strokeWidth={2.2} aria-hidden="true" />
 
                     <span className="text-[17px] font-bold tracking-tight text-ink">뉴비로</span>
                 </span>

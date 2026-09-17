@@ -29,7 +29,7 @@ function AppShell() {
     return (
         <div className={mode === "dark" ? "dark" : undefined}>
             <div className="flex min-h-screen w-full justify-center bg-canvas">
-                <div className="relative flex h-screen max-h-screen w-full max-w-[480px] flex-col overflow-hidden bg-canvas">
+                <div className="relative flex h-screen max-h-screen w-full max-w-120 flex-col overflow-hidden bg-canvas">
                     <BrowserRouter>
                         <Routes>
                             <Route element={<TabLayout />}>

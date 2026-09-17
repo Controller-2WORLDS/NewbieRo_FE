@@ -30,7 +30,7 @@ export function TrendChart({ trend }: TrendChartProps) {
         <div>
             <svg
                 viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-                className="h-[108px] w-full overflow-visible"
+                className="h-27 w-full overflow-visible"
                 role="img"
                 aria-label="월별 평균 위험도 추이"
             >

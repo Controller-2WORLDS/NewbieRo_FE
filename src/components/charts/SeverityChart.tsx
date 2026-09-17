@@ -73,7 +73,7 @@ export function SeverityChart({ segments, onSelect, activeRoadName }: SeverityCh
                                 >
                                     <span
                                         aria-hidden="true"
-                                        className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent"
+                                        className="absolute inset-x-0 top-0 h-1/2 bg-linear-to-b from-white/40 to-transparent"
                                     />
                                 </motion.div>
                             </div>

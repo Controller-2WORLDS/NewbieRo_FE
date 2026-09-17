@@ -13,15 +13,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-  'bg-grad-navy text-on-navy shadow-navy-inset active:shadow-navy-pressed-inset active:translate-y-[1px]',
+  'bg-grad-navy text-on-navy shadow-navy-inset active:shadow-navy-pressed-inset active:translate-y-0.25',
   secondary:
-  'bg-grad-surface text-ink border border-line-soft shadow-card-inset active:shadow-card active:translate-y-[1px]',
+  'bg-grad-surface text-ink border border-line-soft shadow-card-inset active:shadow-card active:translate-y-0.25',
   quiet: 'bg-transparent text-ink-2'
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
   md: 'h-11 px-4 text-[15px]',
-  lg: 'h-[54px] px-5 text-base'
+  lg: 'h-13.5 px-5 text-base'
 };
 
 export function Button({
@@ -51,7 +51,7 @@ export function Button({
       {variant === 'primary' ?
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/16 to-transparent" /> :
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-linear-to-b from-white/16 to-transparent" /> :
 
       null}
       <span className="relative z-10 inline-flex items-center gap-2">
