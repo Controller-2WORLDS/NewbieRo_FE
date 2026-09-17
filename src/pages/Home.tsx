@@ -11,7 +11,7 @@ import { SegmentedControl } from "../components/ui/SegmentedControl"
 import { profile } from "../data/safero"
 import type { DriverType } from "../types/newbiero"
 import { readStoredDriverType } from "../utils/newbiero"
-import { getCurrentPosition, type LatLng } from "../lib/kakao"
+import { getCurrentPosition, reverseGeocode, type LatLng } from "../lib/kakao"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
 
@@ -58,6 +58,14 @@ export function Home() {
         mapRef.current.panTo(new kakao.maps.LatLng(currentPosition.lat, currentPosition.lng))
     }
 
+    const handleMapClick = async (position: LatLng) => {
+        setDestinationCoords(position)
+        setDestination("선택한 위치")
+        setSheetOpen(true)
+        const address = await reverseGeocode(position).catch(() => null)
+        if (address) setDestination(address)
+    }
+
     const findSafeRoute = () => {
         navigate("/routes", {
             state: {
@@ -80,6 +88,7 @@ export function Home() {
                 onCreate={(map) => {
                     mapRef.current = map
                 }}
+                onMapClick={handleMapClick}
                 label="현재 위치가 표시된 지도"
             >
                 {currentPosition ? <CurrentLocationMarker position={currentPosition} /> : null}

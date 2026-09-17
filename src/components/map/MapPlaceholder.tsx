@@ -25,6 +25,8 @@ interface MapPlaceholderProps {
     zoomControl?: boolean
     label?: string
     onCreate?: (map: kakao.maps.Map) => void
+    /** 지도를 탭/클릭해서 직접 좌표를 고를 수 있게 할 때 사용. */
+    onMapClick?: (position: LatLng) => void
 }
 
 export function MapPlaceholder({
@@ -38,6 +40,7 @@ export function MapPlaceholder({
     zoomControl = false,
     label = "지도",
     onCreate,
+    onMapClick,
 }: MapPlaceholderProps) {
     const [loading, error] = useKakaoLoader({
         appkey: KAKAO_MAP_APP_KEY,
@@ -112,6 +115,12 @@ export function MapPlaceholder({
                     }
                     onCreate?.(map)
                 }}
+                onClick={
+                    onMapClick
+                        ? (_, mouseEvent) =>
+                              onMapClick({ lat: mouseEvent.latLng.getLat(), lng: mouseEvent.latLng.getLng() })
+                        : undefined
+                }
             >
                 {heatSpots?.map((spot, index) => (
                     <Circle
