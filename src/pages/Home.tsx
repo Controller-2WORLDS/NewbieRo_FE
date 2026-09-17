@@ -8,7 +8,9 @@ import { BottomSheet } from "../components/ui/BottomSheet"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
 import { SegmentedControl } from "../components/ui/SegmentedControl"
+import { profile } from "../data/safero"
 import type { DriverType } from "../types/newbiero"
+import { readStoredDriverType } from "../utils/newbiero"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
 
@@ -24,7 +26,7 @@ export function Home() {
 
     const [origin, setOrigin] = React.useState(selection?.origin ?? "현재 위치")
     const [destination, setDestination] = React.useState(selection?.destination ?? "")
-    const [driverType, setDriverType] = React.useState<DriverType>("일반")
+    const [driverType, setDriverType] = React.useState<DriverType>(() => readStoredDriverType() ?? profile.driver_type)
     const [sheetOpen, setSheetOpen] = React.useState(Boolean(selection?.destination))
 
     React.useEffect(() => {

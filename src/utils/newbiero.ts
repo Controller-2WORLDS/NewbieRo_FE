@@ -1,4 +1,23 @@
-import type { CongestionLevel, RiskLevel } from "../types/newbiero"
+import type { CongestionLevel, DriverType, RiskLevel } from "../types/newbiero"
+
+const DRIVER_TYPE_STORAGE_KEY = "newbiero:driver-type"
+
+export function readStoredDriverType(): DriverType | null {
+    try {
+        const stored = window.localStorage.getItem(DRIVER_TYPE_STORAGE_KEY)
+        return stored === "초보" || stored === "고령" || stored === "일반" ? stored : null
+    } catch {
+        return null
+    }
+}
+
+export function storeDriverType(driverType: DriverType): void {
+    try {
+        window.localStorage.setItem(DRIVER_TYPE_STORAGE_KEY, driverType)
+    } catch {
+        // localStorage unavailable
+    }
+}
 
 export function riskLevel(score: number): RiskLevel {
     if (score < 34) return "낮음"
