@@ -1,4 +1,3 @@
-import { motion } from "framer-motion"
 import { CustomOverlayMap } from "react-kakao-maps-sdk"
 import type { LatLng } from "../../lib/kakao"
 
@@ -11,11 +10,9 @@ export function CurrentLocationMarker({ position, variant = "dot" }: CurrentLoca
     return (
         <CustomOverlayMap position={position} zIndex={15}>
             <div className="relative flex items-center justify-center" aria-hidden="true">
-                <motion.span
-                    animate={{ scale: [1, 2.6], opacity: [0.24, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                    className="absolute h-8 w-8 rounded-full bg-grad-navy"
-                />
+                {/* animate-ping: 순수 CSS 애니메이션이라 framer-motion 루프 리셋 시 생기던
+                    깜빡임(확산 후 원점으로 순간 복귀하는 지점의 팝) 없이 자연스럽게 반복된다. */}
+                <span className="absolute h-8 w-8 rounded-full bg-grad-navy opacity-30 animate-ping" />
 
                 <span className="absolute h-10 w-10 rounded-full bg-navy opacity-[0.07] blur-md" />
 
