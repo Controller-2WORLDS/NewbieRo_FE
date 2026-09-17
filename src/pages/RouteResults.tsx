@@ -132,8 +132,8 @@ export function RouteResults() {
             </div>
 
             <div className="relative z-20 shrink-0 rounded-t-modal border-t border-line-soft bg-grad-sheen px-5 pb-6 pt-4 shadow-tabbar backdrop-blur-xl">
-                <div className="mb-3 flex items-center justify-between">
-                    <Dropdown label="경로 정렬" options={sortOptions} value={sort} onChange={handleSort} />
+                <div className="mb-3 flex items-center justify-end">
+                    <Dropdown label="경로 정렬" options={sortOptions} value={sort} onChange={handleSort} align="right" />
                 </div>
 
                 <div className="flex flex-col gap-2.5">
