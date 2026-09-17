@@ -75,7 +75,7 @@ export function ProfileEdit() {
                     <button
                         type="button"
                         onClick={() => navigate("/login")}
-                        className="py-3 text-[15px] font-medium text-ink-2 transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+                        className="py-3 text-[15px] font-semibold text-danger transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
                     >
                         로그아웃
                     </button>
