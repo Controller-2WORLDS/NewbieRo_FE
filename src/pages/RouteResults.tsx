@@ -1,5 +1,5 @@
 import React from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { LayersIcon } from "lucide-react"
 import { ScreenHeader } from "../components/ScreenHeader"
 import { MapPlaceholder } from "../components/map/MapPlaceholder"
@@ -11,12 +11,30 @@ import { Dropdown } from "../components/ui/Dropdown"
 import { CurrentLocationMarker } from "../components/map/CurrentLocationMarker"
 import { routeCandidates, riskSegments, restAreas } from "../data/safero"
 import type { RouteCandidate } from "../types/newbiero"
+import { riskLevel } from "../utils/newbiero"
+import type { LatLng } from "../lib/kakao"
 
 const sortOptions = ["안전순", "최단순"] as const
 type SortOption = (typeof sortOptions)[number]
 
+/** 위치 정보 없이 이 화면으로 바로 들어온 경우의 기본 중심(서울시청). */
+const DEFAULT_CENTER: LatLng = { lat: 37.5665, lng: 126.978 }
+
+const riskTone: Record<string, string> = {
+    낮음: "#22c55e",
+    보통: "#ffb020",
+    높음: "#f04452",
+}
+
+interface RouteState {
+    originCoords?: LatLng
+    destinationCoords?: LatLng
+}
+
 export function RouteResults() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const state = (location.state ?? null) as RouteState | null
     const [sort, setSort] = React.useState<SortOption>("안전순")
     const [heatmap, setHeatmap] = React.useState(true)
     const [routes, setRoutes] = React.useState<RouteCandidate[]>(routeCandidates)
@@ -43,17 +61,50 @@ export function RouteResults() {
         [routes, sort]
     )
 
+    const shownRiskSegments = riskSegments.slice(0, 2)
+    const currentPosition = state?.originCoords ?? DEFAULT_CENTER
+    const routePath =
+        state?.originCoords && state?.destinationCoords ? [state.originCoords, state.destinationCoords] : undefined
+    const fitBounds = [
+        currentPosition,
+        ...(state?.destinationCoords ? [state.destinationCoords] : []),
+        ...shownRiskSegments,
+        restAreas[0],
+    ]
+
     return (
         <div className="flex h-full min-h-0 flex-col">
             <ScreenHeader title="경로 결과" />
 
             <div className="relative min-h-0 flex-1">
-                <MapPlaceholder className="absolute inset-0" heatmap={heatmap} showRoute label="경로 후보 지도">
-                    <CurrentLocationMarker x={20} y={88} />
-                    <MapMarker kind="risk" x={45} y={40} label={riskSegments[0].road_name} />
-                    <MapMarker kind="risk" x={67} y={62} delay={0.05} label={riskSegments[1].road_name} />
+                <MapPlaceholder
+                    className="absolute inset-0"
+                    center={currentPosition}
+                    fitBounds={fitBounds}
+                    routePath={routePath}
+                    heatSpots={
+                        heatmap
+                            ? shownRiskSegments.map((segment) => ({
+                                  position: segment,
+                                  radius: 350,
+                                  tone: riskTone[riskLevel(segment.severity_score)],
+                              }))
+                            : undefined
+                    }
+                    label="경로 후보 지도"
+                >
+                    <CurrentLocationMarker position={currentPosition} />
+                    {shownRiskSegments.map((segment, index) => (
+                        <MapMarker
+                            key={segment.road_name}
+                            kind="risk"
+                            position={segment}
+                            delay={index * 0.05}
+                            label={segment.road_name}
+                        />
+                    ))}
 
-                    <MapMarker kind="rest" x={28} y={73} delay={0.1} label={restAreas[0].rest_area_name} />
+                    <MapMarker kind="rest" position={restAreas[0]} delay={0.1} label={restAreas[0].rest_area_name} />
 
                     <div className="absolute left-4 top-4 z-20">
                         <HeatmapLegend />

@@ -11,12 +11,17 @@ import { SegmentedControl } from "../components/ui/SegmentedControl"
 import { profile } from "../data/safero"
 import type { DriverType } from "../types/newbiero"
 import { readStoredDriverType } from "../utils/newbiero"
+import { getCurrentPosition, type LatLng } from "../lib/kakao"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
+
+/** 위치 권한이 없거나 실패했을 때의 기본 중심(서울시청). */
+const DEFAULT_CENTER: LatLng = { lat: 37.5665, lng: 126.978 }
 
 interface PlaceSelection {
     origin?: string
     destination?: string
+    destinationCoords?: LatLng
 }
 
 export function Home() {
@@ -26,21 +31,61 @@ export function Home() {
 
     const [origin, setOrigin] = React.useState(selection?.origin ?? "현재 위치")
     const [destination, setDestination] = React.useState(selection?.destination ?? "")
+    const [destinationCoords, setDestinationCoords] = React.useState<LatLng | null>(
+        selection?.destinationCoords ?? null
+    )
+    const [currentPosition, setCurrentPosition] = React.useState<LatLng | null>(null)
     const [driverType, setDriverType] = React.useState<DriverType>(() => readStoredDriverType() ?? profile.driver_type)
     const [sheetOpen, setSheetOpen] = React.useState(Boolean(selection?.destination))
+    const mapRef = React.useRef<kakao.maps.Map | null>(null)
+
+    React.useEffect(() => {
+        getCurrentPosition()
+            .then(setCurrentPosition)
+            .catch(() => setCurrentPosition(null))
+    }, [])
 
     React.useEffect(() => {
         if (!selection?.destination) return
         setOrigin(selection.origin ?? "현재 위치")
         setDestination(selection.destination)
+        setDestinationCoords(selection.destinationCoords ?? null)
         setSheetOpen(true)
-    }, [selection?.destination, selection?.origin])
+    }, [selection?.destination, selection?.origin, selection?.destinationCoords])
+
+    const centerOnCurrentPosition = () => {
+        if (!currentPosition || !mapRef.current) return
+        mapRef.current.panTo(new kakao.maps.LatLng(currentPosition.lat, currentPosition.lng))
+    }
+
+    const findSafeRoute = () => {
+        navigate("/routes", {
+            state: {
+                origin,
+                destination,
+                originCoords: origin === "현재 위치" ? currentPosition : undefined,
+                destinationCoords,
+            },
+        })
+    }
 
     return (
         <div className="relative h-full min-h-0">
-            <MapPlaceholder className="absolute inset-0" label="현재 위치가 표시된 지도">
-                <CurrentLocationMarker x={46} y={62} />
-                {destination ? <MapMarker kind="place" x={64} y={34} label={destination} /> : null}
+            <MapPlaceholder
+                className="absolute inset-0"
+                center={currentPosition ?? destinationCoords ?? DEFAULT_CENTER}
+                fitBounds={
+                    currentPosition && destinationCoords ? [currentPosition, destinationCoords] : undefined
+                }
+                onCreate={(map) => {
+                    mapRef.current = map
+                }}
+                label="현재 위치가 표시된 지도"
+            >
+                {currentPosition ? <CurrentLocationMarker position={currentPosition} /> : null}
+                {destination && destinationCoords ? (
+                    <MapMarker kind="place" position={destinationCoords} label={destination} />
+                ) : null}
             </MapPlaceholder>
 
             <div className="absolute inset-x-0 top-0 z-20 px-4 pt-3">
@@ -66,6 +111,7 @@ export function Home() {
             <div className="absolute bottom-5 right-4 z-20">
                 <button
                     type="button"
+                    onClick={centerOnCurrentPosition}
                     aria-label="현재 위치로 이동"
                     className="flex h-12 w-12 items-center justify-center rounded-full border border-line-soft bg-grad-sheen text-navy shadow-lifted-inset backdrop-blur-xl transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
                 >
@@ -97,7 +143,7 @@ export function Home() {
                         />
                     </div>
 
-                    <Button size="lg" fullWidth className="mt-6" onClick={() => navigate("/routes")}>
+                    <Button size="lg" fullWidth className="mt-6" onClick={findSafeRoute}>
                         안전 경로 찾기
                     </Button>
                 </div>

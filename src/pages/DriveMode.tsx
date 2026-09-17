@@ -10,11 +10,22 @@ import { CongestionBadge } from "../components/ui/CongestionBadge"
 import { Button } from "../components/ui/Button"
 import { Modal } from "../components/ui/Modal"
 import { approachingRestArea, driveAlert, riskSegments } from "../data/safero"
+import { getCurrentPosition, type LatLng } from "../lib/kakao"
+
+/** 위치 권한이 없거나 실패했을 때의 기본 중심(서울시청). */
+const DEFAULT_CENTER: LatLng = { lat: 37.5665, lng: 126.978 }
 
 export function DriveMode() {
     const navigate = useNavigate()
     const [restAreaVisible, setRestAreaVisible] = React.useState(false)
     const [endConfirmOpen, setEndConfirmOpen] = React.useState(false)
+    const [currentPosition, setCurrentPosition] = React.useState<LatLng | null>(null)
+
+    React.useEffect(() => {
+        getCurrentPosition()
+            .then(setCurrentPosition)
+            .catch(() => setCurrentPosition(null))
+    }, [])
 
     React.useEffect(() => {
         const showTimer = window.setTimeout(() => setRestAreaVisible(true), 2600)
@@ -31,22 +42,23 @@ export function DriveMode() {
         <div className="relative flex h-full min-h-0 flex-col">
             <MapPlaceholder
                 className="absolute inset-0"
-                variant="nav"
-                moving
-                showRoute
+                center={currentPosition ?? DEFAULT_CENTER}
+                level={3}
+                routePath={
+                    currentPosition ? [currentPosition, riskSegments[0], approachingRestArea] : undefined
+                }
                 label="주행 중 실시간 위치 지도"
             >
-                <MapMarker kind="risk" x={44} y={38} label={`위험구간 ${riskSegments[0].road_name}`} />
+                <MapMarker kind="risk" position={riskSegments[0]} label={`위험구간 ${riskSegments[0].road_name}`} />
 
                 <MapMarker
                     kind="rest"
-                    x={70}
-                    y={52}
+                    position={approachingRestArea}
                     delay={0.06}
                     label={`졸음쉼터 ${approachingRestArea.rest_area_name}`}
                 />
 
-                <CurrentLocationMarker x={50} y={78} variant="puck" />
+                <CurrentLocationMarker position={currentPosition ?? DEFAULT_CENTER} variant="puck" />
             </MapPlaceholder>
 
             <div className="relative z-20 flex h-full min-h-0 flex-col p-4">

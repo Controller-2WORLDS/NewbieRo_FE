@@ -2,7 +2,7 @@ import React from "react"
 import { AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { ScreenHeader } from "../components/ScreenHeader"
-import { InteractiveMap } from "../components/map/InteractiveMap"
+import { MapPlaceholder } from "../components/map/MapPlaceholder"
 import { MapMarker } from "../components/map/MapMarker"
 import { MapTooltip } from "../components/map/MapTooltip"
 import { SeverityChart } from "../components/charts/SeverityChart"
@@ -11,12 +11,7 @@ import { Button } from "../components/ui/Button"
 import { Card } from "../components/ui/Card"
 import { restAreas, riskSegments } from "../data/safero"
 
-const markerPositions = [
-    { x: 44, y: 28 },
-    { x: 66, y: 44 },
-    { x: 30, y: 58 },
-    { x: 74, y: 70 },
-]
+const mapBounds = [...riskSegments.map((segment) => segment), restAreas[0]]
 
 export function RouteDetail() {
     const navigate = useNavigate()
@@ -27,13 +22,18 @@ export function RouteDetail() {
             <ScreenHeader title="경로 상세" />
 
             <div className="min-h-0 flex-1 overflow-y-auto no-scrollbar">
-                <InteractiveMap className="h-110 w-full" showRoute label="경로 상세 지도">
+                <MapPlaceholder
+                    className="h-110 w-full"
+                    center={riskSegments[0]}
+                    fitBounds={mapBounds}
+                    zoomControl
+                    label="경로 상세 지도"
+                >
                     {riskSegments.map((segment, index) => (
                         <MapMarker
                             key={segment.road_name}
                             kind="risk"
-                            x={markerPositions[index].x}
-                            y={markerPositions[index].y}
+                            position={segment}
                             delay={index * 0.04}
                             active={activeRoad === segment.road_name}
                             label={`위험구간 ${segment.road_name}`}
@@ -49,13 +49,13 @@ export function RouteDetail() {
                         </MapMarker>
                     ))}
 
-                    <MapMarker kind="rest" x={20} y={84} delay={0.16} label={`졸음쉼터 ${restAreas[0].rest_area_name}`}>
+                    <MapMarker kind="rest" position={restAreas[0]} delay={0.16} label={`졸음쉼터 ${restAreas[0].rest_area_name}`}>
                         <span className="mb-2 flex items-center gap-2 whitespace-nowrap rounded-full border border-line-soft bg-grad-sheen px-2.5 py-1 shadow-lifted backdrop-blur-xl">
                             <span className="text-[12px] font-semibold text-ink">{restAreas[0].rest_area_name}</span>
                             <CongestionBadge rate={restAreas[0].predicted_occupancy_rate} />
                         </span>
                     </MapMarker>
-                </InteractiveMap>
+                </MapPlaceholder>
 
                 <div className="px-5 pb-8 pt-7">
                     <section>
