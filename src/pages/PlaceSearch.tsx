@@ -1,20 +1,64 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowRightIcon, ChevronLeftIcon, ClockIcon, MapPinIcon, SearchIcon, XIcon } from "lucide-react"
+import { useKakaoLoader } from "react-kakao-maps-sdk"
 import { recentQueries } from "../data/safero"
 import { formatDateTime } from "../utils/newbiero"
+import { KAKAO_MAP_APP_KEY, searchPlacesByKeyword, type PlaceSearchResult } from "../lib/kakao"
 
 export function PlaceSearch() {
     const navigate = useNavigate()
+    const [loading] = useKakaoLoader({ appkey: KAKAO_MAP_APP_KEY, libraries: ["services"] })
     const [keyword, setKeyword] = React.useState("")
+    const [results, setResults] = React.useState<PlaceSearchResult[]>([])
+    const [searching, setSearching] = React.useState(false)
+    const [searchError, setSearchError] = React.useState(false)
 
-    const results = React.useMemo(() => {
-        if (keyword.trim().length === 0) return []
-        return recentQueries.filter((query) => query.destination.includes(keyword.trim()))
-    }, [keyword])
+    React.useEffect(() => {
+        const trimmed = keyword.trim()
+        if (trimmed.length === 0 || loading) {
+            setResults([])
+            setSearchError(false)
+            return
+        }
 
-    const select = (origin: string, destination: string) => {
-        navigate("/", { state: { origin, destination } })
+        let cancelled = false
+        setSearching(true)
+        const timer = window.setTimeout(() => {
+            searchPlacesByKeyword(trimmed)
+                .then((found) => {
+                    if (cancelled) return
+                    setResults(found)
+                    setSearchError(false)
+                })
+                .catch(() => {
+                    if (cancelled) return
+                    setResults([])
+                    setSearchError(true)
+                })
+                .finally(() => {
+                    if (!cancelled) setSearching(false)
+                })
+        }, 300)
+
+        return () => {
+            cancelled = true
+            window.clearTimeout(timer)
+        }
+    }, [keyword, loading])
+
+    const selectRecent = (origin: string, destination: string, lat: number, lng: number) => {
+        navigate("/", { state: { origin, destination, destinationCoords: { lat, lng } } })
+    }
+
+    const selectResult = (place: PlaceSearchResult) => {
+        navigate("/", {
+            state: {
+                origin: "현재 위치",
+                destination: place.placeName,
+                destinationCoords: { lat: place.lat, lng: place.lng },
+            },
+        })
     }
 
     return (
@@ -62,7 +106,14 @@ export function PlaceSearch() {
                                 <li key={query.requested_at}>
                                     <button
                                         type="button"
-                                        onClick={() => select(query.origin, query.destination)}
+                                        onClick={() =>
+                                            selectRecent(
+                                                query.origin,
+                                                query.destination,
+                                                query.destination_lat,
+                                                query.destination_lng
+                                            )
+                                        }
                                         className="flex w-full items-center gap-3 py-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
                                     >
                                         <ClockIcon
@@ -95,13 +146,17 @@ export function PlaceSearch() {
                             ))}
                         </ul>
                     </section>
+                ) : searching ? (
+                    <p className="pt-16 text-center text-[14px] text-ink-3">검색 중...</p>
+                ) : searchError ? (
+                    <p className="pt-16 text-center text-[14px] text-ink-3">검색에 실패했습니다. 다시 시도해 주세요.</p>
                 ) : results.length > 0 ? (
                     <ul className="divide-y divide-line pt-2">
-                        {results.map((query) => (
-                            <li key={query.requested_at}>
+                        {results.map((place) => (
+                            <li key={place.id}>
                                 <button
                                     type="button"
-                                    onClick={() => select(query.origin, query.destination)}
+                                    onClick={() => selectResult(place)}
                                     className="flex w-full items-center gap-3 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
                                 >
                                     <MapPinIcon
@@ -110,8 +165,13 @@ export function PlaceSearch() {
                                         aria-hidden="true"
                                     />
 
-                                    <span className="truncate text-[16px] font-medium text-ink">
-                                        {query.destination}
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block truncate text-[16px] font-medium text-ink">
+                                            {place.placeName}
+                                        </span>
+                                        <span className="mt-0.5 block truncate text-[12px] text-ink-3">
+                                            {place.addressName}
+                                        </span>
                                     </span>
                                 </button>
                             </li>
