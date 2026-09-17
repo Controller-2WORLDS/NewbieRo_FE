@@ -80,11 +80,6 @@ export const tripReport: TripReport = {
     total_risk_score: 52,
     driven_at: "2026-09-15T08:05:00",
     tips: "사고이력이 많은 교차로에 진입하기 전 감속 구간을 조금 더 길게 확보해 보세요.",
-    segments: [
-        { road_name: "남부순환로 교차로", accident_count: 18, severity_score: 84 },
-        { road_name: "반포대교 남단", accident_count: 11, severity_score: 61 },
-        { road_name: "양재천로 합류부", accident_count: 4, severity_score: 26 },
-    ],
 }
 
 export const userStats: UserStats = {

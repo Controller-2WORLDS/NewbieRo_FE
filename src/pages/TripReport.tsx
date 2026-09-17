@@ -1,88 +1,58 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ScreenHeader } from '../components/ScreenHeader';
-import { Card } from '../components/ui/Card';
-import { StatCard } from '../components/ui/StatCard';
-import { RiskBadge } from '../components/ui/RiskBadge';
-import { Button } from '../components/ui/Button';
-import { MiniMap } from '../components/MiniMap';
-import { tripReport } from '../data/safero';
-import { formatDateTime, riskLevel } from '../utils/safero';
+import { useNavigate } from "react-router-dom"
+import { ScreenHeader } from "../components/ScreenHeader"
+import { Card } from "../components/ui/Card"
+import { StatCard } from "../components/ui/StatCard"
+import { RiskBadge } from "../components/ui/RiskBadge"
+import { Button } from "../components/ui/Button"
+import { MiniMap } from "../components/MiniMap"
+import { tripReport } from "../data/safero"
+import { formatDateTime, riskLevel } from "../utils/newbiero"
 
 export function TripReport() {
-  const navigate = useNavigate();
+    const navigate = useNavigate()
 
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      <ScreenHeader title="운행 리포트" onBack={() => navigate('/')} />
+    return (
+        <div className="flex h-full min-h-0 flex-col">
+            <ScreenHeader title="운행 리포트" onBack={() => navigate("/")} />
 
-      <main className="min-h-0 flex-1 overflow-y-auto no-scrollbar px-5 pb-8 pt-6">
-        <p className="text-[13px] text-ink-2">
-          {formatDateTime(tripReport.driven_at)}
-        </p>
-        <h2 className="mt-2 text-[27px] font-bold leading-tight tracking-[-0.03em] text-ink">
-          주행이 끝났어요
-        </h2>
+            <main className="min-h-0 flex-1 overflow-y-auto no-scrollbar px-5 pb-8 pt-6">
+                <p className="text-[13px] text-ink-2">{formatDateTime(tripReport.driven_at)}</p>
+                <h2 className="mt-2 text-[27px] font-bold leading-tight tracking-[-0.03em] text-ink">
+                    주행이 끝났어요
+                </h2>
 
-        <div className="mt-6 grid grid-cols-2 gap-2.5">
-          <StatCard
-            label="지나온 위험구간"
-            value={tripReport.risk_segments_passed}
-            unit="곳" />
-          
-          <StatCard
-            label="주행 위험도"
-            value={
-            <RiskBadge
-              level={riskLevel(tripReport.total_risk_score)}
-              size="md" />
+                <div className="mt-6 grid grid-cols-2 gap-2.5">
+                    <StatCard label="지나온 위험구간" value={tripReport.risk_segments_passed} unit="곳" />
 
-            } />
-          
-        </div>
-
-        <section className="mt-9">
-          <h3 className="text-[18px] font-semibold tracking-tight text-ink">
-            지나온 위험구간
-          </h3>
-          <ul className="mt-1 divide-y divide-line">
-            {tripReport.segments.map((segment) =>
-            <li
-              key={segment.road_name}
-              className="flex items-center gap-3.5 py-3.5">
-              
-                <MiniMap level={riskLevel(segment.severity_score)} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15px] font-medium text-ink">
-                    {segment.road_name}
-                  </p>
-                  <p className="mt-1 text-[12px] text-ink-3">
-                    사고 {segment.accident_count}건
-                  </p>
+                    <StatCard
+                        label="주행 위험도"
+                        value={<RiskBadge level={riskLevel(tripReport.total_risk_score)} size="md" />}
+                    />
                 </div>
-                <RiskBadge level={riskLevel(segment.severity_score)} />
-              </li>
-            )}
-          </ul>
-        </section>
 
-        <section className="mt-9">
-          <h3 className="text-[18px] font-semibold tracking-tight text-ink">
-            개선 팁
-          </h3>
-          <Card className="mt-3">
-            <p className="text-[15px] leading-relaxed text-ink">
-              {tripReport.tips}
-            </p>
-          </Card>
-        </section>
-      </main>
+                <section className="mt-9">
+                    <h3 className="text-[18px] font-semibold tracking-tight text-ink">지나온 경로</h3>
+                    <div className="mt-3">
+                        <MiniMap
+                            level={riskLevel(tripReport.total_risk_score)}
+                            count={tripReport.risk_segments_passed}
+                        />
+                    </div>
+                </section>
 
-      <div className="relative z-20 shrink-0 border-t border-line-soft bg-grad-sheen px-5 pb-6 pt-4 shadow-tabbar backdrop-blur-xl">
-        <Button size="lg" fullWidth onClick={() => navigate('/')}>
-          홈으로
-        </Button>
-      </div>
-    </div>);
+                <section className="mt-9">
+                    <h3 className="text-[18px] font-semibold tracking-tight text-ink">개선 팁</h3>
+                    <Card className="mt-3">
+                        <p className="text-[15px] leading-relaxed text-ink">{tripReport.tips}</p>
+                    </Card>
+                </section>
+            </main>
 
+            <div className="relative z-20 shrink-0 border-t border-line-soft bg-grad-sheen px-5 pb-6 pt-4 shadow-tabbar backdrop-blur-xl">
+                <Button size="lg" fullWidth onClick={() => navigate("/")}>
+                    홈으로
+                </Button>
+            </div>
+        </div>
+    )
 }

@@ -43,7 +43,6 @@ export interface TripReport {
   total_risk_score: number;
   driven_at: string;
   tips: string;
-  segments: RiskSegment[];
 }
 
 export interface UserProfile {
