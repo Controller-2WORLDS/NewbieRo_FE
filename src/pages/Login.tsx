@@ -35,7 +35,7 @@ export function Login() {
                 <span className="flex items-center gap-2">
                     <NavigationIcon className="h-[18px] w-[18px] text-navy" strokeWidth={2.2} aria-hidden="true" />
 
-                    <span className="text-[17px] font-bold tracking-tight text-ink">SafeRo</span>
+                    <span className="text-[17px] font-bold tracking-tight text-ink">뉴비로</span>
                 </span>
             </header>
 
