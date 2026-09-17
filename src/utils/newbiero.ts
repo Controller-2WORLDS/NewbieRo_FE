@@ -35,8 +35,9 @@ export function formatDateTime(iso: string): string {
     return `${month}월 ${day}일 ${hours}:${minutes}`
 }
 
-export function formatMonth(iso: string): string {
-    return `${new Date(iso).getMonth() + 1}월`
+export function formatShortDate(iso: string): string {
+    const date = new Date(iso)
+    return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
 export function formatOccupancy(rate: number): CongestionLevel {

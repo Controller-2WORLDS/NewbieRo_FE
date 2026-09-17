@@ -87,12 +87,14 @@ export const userStats: UserStats = {
     total_risk_segments_passed: 412,
     avg_risk_score: 38,
     trend: [
-        { requested_at: "2026-04-01T00:00:00", avg_risk_score: 61 },
-        { requested_at: "2026-05-01T00:00:00", avg_risk_score: 54 },
-        { requested_at: "2026-06-01T00:00:00", avg_risk_score: 58 },
-        { requested_at: "2026-07-01T00:00:00", avg_risk_score: 45 },
-        { requested_at: "2026-08-01T00:00:00", avg_risk_score: 41 },
-        { requested_at: "2026-09-01T00:00:00", avg_risk_score: 38 },
+        { requested_at: "2026-07-27T00:00:00", avg_risk_score: 66 },
+        { requested_at: "2026-08-03T00:00:00", avg_risk_score: 60 },
+        { requested_at: "2026-08-10T00:00:00", avg_risk_score: 58 },
+        { requested_at: "2026-08-17T00:00:00", avg_risk_score: 53 },
+        { requested_at: "2026-08-24T00:00:00", avg_risk_score: 49 },
+        { requested_at: "2026-08-31T00:00:00", avg_risk_score: 45 },
+        { requested_at: "2026-09-07T00:00:00", avg_risk_score: 41 },
+        { requested_at: "2026-09-14T00:00:00", avg_risk_score: 38 },
     ],
 }
 

@@ -1,7 +1,7 @@
 import React from "react"
 import { motion } from "framer-motion"
 import type { TrendPoint } from "../../types/newbiero"
-import { formatMonth } from "../../utils/newbiero"
+import { formatShortDate } from "../../utils/newbiero"
 
 interface TrendChartProps {
     trend: TrendPoint[]
@@ -83,7 +83,7 @@ export function TrendChart({ trend }: TrendChartProps) {
             <div className="mt-3 flex justify-between">
                 {trend.map((point) => (
                     <span key={point.requested_at} className="text-[11px] font-semibold text-ink-3">
-                        {formatMonth(point.requested_at)}
+                        {formatShortDate(point.requested_at)}
                     </span>
                 ))}
             </div>
