@@ -2,6 +2,22 @@ import React from 'react';
 
 export type ThemeMode = 'light' | 'dark';
 
+const STORAGE_KEY = 'newbiero:theme-mode';
+
+function readStoredMode(): ThemeMode | null {
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return stored === 'light' || stored === 'dark' ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+function readPreferredMode(): ThemeMode {
+  if (typeof window === 'undefined' || !window.matchMedia) return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 interface ThemeContextValue {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
@@ -15,24 +31,32 @@ const ThemeContext = React.createContext<ThemeContextValue>({
 });
 
 interface ThemeProviderProps {
-  initialMode: ThemeMode;
+  /** Explicit override (e.g. for tests/storybook). Omit to use the saved/system preference. */
+  initialMode?: ThemeMode;
   children: React.ReactNode;
 }
 
 export function ThemeProvider({ initialMode, children }: ThemeProviderProps) {
-  const [mode, setMode] = React.useState<ThemeMode>(initialMode);
+  const [mode, setModeState] = React.useState<ThemeMode>(
+    () => initialMode ?? readStoredMode() ?? readPreferredMode()
+  );
 
-  React.useEffect(() => {
-    setMode(initialMode);
-  }, [initialMode]);
+  const setMode = React.useCallback((next: ThemeMode) => {
+    setModeState(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // localStorage unavailable (private browsing, disabled storage) — keep in-memory only
+    }
+  }, []);
 
   const value = React.useMemo<ThemeContextValue>(
     () => ({
       mode,
       setMode,
-      toggle: () => setMode((current) => current === 'dark' ? 'light' : 'dark')
+      toggle: () => setMode(mode === 'dark' ? 'light' : 'dark')
     }),
-    [mode]
+    [mode, setMode]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

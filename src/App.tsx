@@ -15,7 +15,7 @@ interface AppProps {
     theme?: "light" | "dark"
 }
 
-export function App({ theme = "light" }: AppProps) {
+export function App({ theme }: AppProps) {
     return (
         <ThemeProvider initialMode={theme}>
             <AppShell />
