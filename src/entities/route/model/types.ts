@@ -12,6 +12,7 @@ export interface RouteCandidate {
 }
 
 export interface RiskSegment {
+    segment_id: string
     road_name: string
     accident_count: number
     severity_score: number
@@ -20,8 +21,10 @@ export interface RiskSegment {
 }
 
 export interface RestArea {
+    rest_area_id: string
     rest_area_name: string
-    predicted_occupancy_rate: number
+    /** 혼잡도는 별도 congestion API로 조회해야 알 수 있어, 불러오기 전까지는 없다. */
+    predicted_occupancy_rate?: number
     lat: number
     lng: number
 }

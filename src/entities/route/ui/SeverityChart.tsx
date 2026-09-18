@@ -4,8 +4,8 @@ import { riskLevel } from "@shared/lib/risk"
 
 interface SeverityChartProps {
     segments: RiskSegment[]
-    onSelect?: (road_name: string) => void
-    activeRoadName?: string
+    onSelect?: (segment_id: string) => void
+    activeSegmentId?: string
 }
 
 const barTone: Record<string, { fill: string; glow: string }> = {
@@ -23,7 +23,7 @@ const barTone: Record<string, { fill: string; glow: string }> = {
     },
 }
 
-export function SeverityChart({ segments, onSelect, activeRoadName }: SeverityChartProps) {
+export function SeverityChart({ segments, onSelect, activeSegmentId }: SeverityChartProps) {
     const max = Math.max(...segments.map((segment) => segment.severity_score), 1)
 
     return (
@@ -32,12 +32,12 @@ export function SeverityChart({ segments, onSelect, activeRoadName }: SeverityCh
                 const level = riskLevel(segment.severity_score)
                 const tone = barTone[level]
                 const width = Math.max(8, Math.round((segment.severity_score / max) * 100))
-                const active = activeRoadName === segment.road_name
+                const active = activeSegmentId === segment.segment_id
                 return (
-                    <li key={segment.road_name} className={index > 0 ? "border-t border-line" : ""}>
+                    <li key={segment.segment_id} className={index > 0 ? "border-t border-line" : ""}>
                         <button
                             type="button"
-                            onClick={onSelect ? () => onSelect(segment.road_name) : undefined}
+                            onClick={onSelect ? () => onSelect(segment.segment_id) : undefined}
                             className={[
                                 "w-full py-3.5 text-left",
                                 "transition-opacity duration-150 ease-out",
