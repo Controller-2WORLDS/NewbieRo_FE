@@ -1,5 +1,8 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import type { ReactNode } from "react"
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "./providers/ThemeProvider"
+import { AuthProvider, useAuth } from "./providers/AuthProvider"
+import { QueryProvider } from "./providers/QueryProvider"
 import { TabLayout } from "@widgets/tab-layout"
 import { Home } from "@pages/home"
 import { MyPage } from "@pages/my-page"
@@ -17,10 +20,25 @@ interface AppProps {
 
 export function App({ theme }: AppProps) {
     return (
-        <ThemeProvider initialMode={theme}>
-            <AppShell />
-        </ThemeProvider>
+        <QueryProvider>
+            <AuthProvider>
+                <ThemeProvider initialMode={theme}>
+                    <AppShell />
+                </ThemeProvider>
+            </AuthProvider>
+        </QueryProvider>
     )
+}
+
+function ProtectedRoute({ children }: { children: ReactNode }) {
+    const { isAuthenticated } = useAuth()
+    const location = useLocation()
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" state={{ from: location }} replace />
+    }
+
+    return children
 }
 
 function AppShell() {
@@ -32,17 +50,17 @@ function AppShell() {
                 <div className="relative flex h-screen max-h-screen w-full max-w-120 flex-col overflow-hidden bg-canvas">
                     <BrowserRouter>
                         <Routes>
-                            <Route element={<TabLayout />}>
+                            <Route path="/login" element={<Login />} />
+                            <Route element={<ProtectedRoute><TabLayout /></ProtectedRoute>}>
                                 <Route path="/" element={<Home />} />
                                 <Route path="/mypage" element={<MyPage />} />
                             </Route>
-                            <Route path="/search" element={<PlaceSearch />} />
-                            <Route path="/routes" element={<RouteResults />} />
-                            <Route path="/routes/detail" element={<RouteDetail />} />
-                            <Route path="/drive" element={<DriveMode />} />
-                            <Route path="/report" element={<TripReport />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/profile" element={<ProfileEdit />} />
+                            <Route path="/search" element={<ProtectedRoute><PlaceSearch /></ProtectedRoute>} />
+                            <Route path="/routes" element={<ProtectedRoute><RouteResults /></ProtectedRoute>} />
+                            <Route path="/routes/detail" element={<ProtectedRoute><RouteDetail /></ProtectedRoute>} />
+                            <Route path="/drive" element={<ProtectedRoute><DriveMode /></ProtectedRoute>} />
+                            <Route path="/report" element={<ProtectedRoute><TripReport /></ProtectedRoute>} />
+                            <Route path="/profile" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
                         </Routes>
                     </BrowserRouter>
                 </div>
