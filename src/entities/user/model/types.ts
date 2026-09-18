@@ -1,15 +1,15 @@
 export type DriverType = "초보" | "고령" | "일반"
 
+/** GET /users/me 응답 그대로 — 서버는 email/생년월일을 내려주지 않는다. */
 export interface UserProfile {
+    user_id: string
     name: string
-    email: string
-    birth_date: string
     license_issue_date: string
     driver_type: DriverType
 }
 
 export interface TrendPoint {
-    requested_at: string
+    week_start: string
     avg_risk_score: number
 }
 

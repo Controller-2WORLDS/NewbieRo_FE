@@ -70,7 +70,7 @@ export function TrendChart({ trend }: TrendChartProps) {
 
                 {points.map((entry, index) => (
                     <circle
-                        key={entry.point.requested_at}
+                        key={entry.point.week_start}
                         cx={entry.x}
                         cy={entry.y}
                         r={index === points.length - 1 ? 4.5 : 3}
@@ -82,8 +82,8 @@ export function TrendChart({ trend }: TrendChartProps) {
             </svg>
             <div className="mt-3 flex justify-between">
                 {trend.map((point) => (
-                    <span key={point.requested_at} className="text-[11px] font-semibold text-ink-3">
-                        {formatShortDate(point.requested_at)}
+                    <span key={point.week_start} className="text-[11px] font-semibold text-ink-3">
+                        {formatShortDate(point.week_start)}
                     </span>
                 ))}
             </div>

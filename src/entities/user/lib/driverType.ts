@@ -1,20 +1,22 @@
 import type { DriverType } from "../model/types"
+import type { ApiDriverType } from "../api/types"
 
-const DRIVER_TYPE_STORAGE_KEY = "newbiero:driver-type"
-
-export function readStoredDriverType(): DriverType | null {
-    try {
-        const stored = window.localStorage.getItem(DRIVER_TYPE_STORAGE_KEY)
-        return stored === "초보" || stored === "고령" || stored === "일반" ? stored : null
-    } catch {
-        return null
-    }
+const KOREAN_TO_API: Record<DriverType, ApiDriverType> = {
+    초보: "NOVICE",
+    고령: "ELDERLY",
+    일반: "GENERAL",
 }
 
-export function storeDriverType(driverType: DriverType): void {
-    try {
-        window.localStorage.setItem(DRIVER_TYPE_STORAGE_KEY, driverType)
-    } catch {
-        // localStorage unavailable
-    }
+const API_TO_KOREAN: Record<ApiDriverType, DriverType> = {
+    NOVICE: "초보",
+    ELDERLY: "고령",
+    GENERAL: "일반",
+}
+
+export function toApiDriverType(driverType: DriverType): ApiDriverType {
+    return KOREAN_TO_API[driverType]
+}
+
+export function fromApiDriverType(driverType: ApiDriverType): DriverType {
+    return API_TO_KOREAN[driverType]
 }
