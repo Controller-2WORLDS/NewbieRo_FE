@@ -2,7 +2,7 @@ import React from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowRightIcon, ChevronLeftIcon, ClockIcon, MapPinIcon, SearchIcon, XIcon } from "lucide-react"
 import { useKakaoLoader } from "react-kakao-maps-sdk"
-import { recentQueries } from "@mocks/safero"
+import { coordinateLabel, useRouteHistory } from "@entities/route"
 import { formatDateTime } from "@shared/lib/date"
 import { KAKAO_MAP_APP_KEY, searchPlacesByKeyword, type PlaceSearchResult } from "@shared/api/kakao"
 
@@ -13,6 +13,16 @@ export function PlaceSearch() {
     const [results, setResults] = React.useState<PlaceSearchResult[]>([])
     const [searching, setSearching] = React.useState(false)
     const [searchError, setSearchError] = React.useState(false)
+
+    const { data: history } = useRouteHistory({ size: 10 })
+    const recentQueries =
+        history?.routes.map((route) => ({
+            origin: coordinateLabel(route.origin, "출발지"),
+            destination: coordinateLabel(route.destination, "도착지"),
+            requested_at: route.requested_at,
+            destination_lat: route.destination.lat,
+            destination_lng: route.destination.lng,
+        })) ?? []
 
     React.useEffect(() => {
         const trimmed = keyword.trim()
@@ -101,6 +111,9 @@ export function PlaceSearch() {
                 {keyword.trim().length === 0 ? (
                     <section className="pt-4">
                         <h2 className="text-[14px] font-medium text-ink-2">최근 검색지</h2>
+                        {recentQueries.length === 0 ? (
+                            <p className="pt-6 text-center text-[14px] text-ink-3">최근 검색한 경로가 없어요.</p>
+                        ) : (
                         <ul className="mt-1 divide-y divide-line">
                             {recentQueries.map((query) => (
                                 <li key={query.requested_at}>
@@ -145,6 +158,7 @@ export function PlaceSearch() {
                                 </li>
                             ))}
                         </ul>
+                        )}
                     </section>
                 ) : searching ? (
                     <p className="pt-16 text-center text-[14px] text-ink-3">검색 중...</p>

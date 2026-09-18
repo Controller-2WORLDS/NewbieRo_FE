@@ -3,16 +3,25 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { LayersIcon } from "lucide-react"
 import { ScreenHeader } from "@widgets/screen-header"
 import { MapPlaceholder, MapMarker, HeatmapLegend, CurrentLocationMarker } from "@widgets/kakao-map"
-import { RouteCard, type RouteCandidate } from "@entities/route"
+import {
+    RouteCard,
+    toRestArea,
+    toRiskSegment,
+    toRouteCandidates,
+    useRestAreas,
+    useRiskSegments,
+    useRoute,
+    useSelectRouteOption,
+    type RouteCandidate,
+} from "@entities/route"
 import { Button, Dropdown } from "@shared/ui"
-import { riskLevel } from "@shared/lib/risk"
-import { routeCandidates, riskSegments, restAreas } from "@mocks/safero"
+import { riskLevel, buildBboxAround } from "@shared/lib"
 import type { LatLng } from "@shared/api/kakao"
 
 const sortOptions = ["안전순", "최단순"] as const
 type SortOption = (typeof sortOptions)[number]
 
-/** 위치 정보 없이 이 화면으로 바로 들어온 경우의 기본 중심(서울시청). */
+/** 경로 데이터가 아직 없을 때(direct URL 접근 등)의 기본 중심(서울시청). */
 const DEFAULT_CENTER: LatLng = { lat: 37.5665, lng: 126.978 }
 
 const riskTone: Record<string, string> = {
@@ -21,51 +30,93 @@ const riskTone: Record<string, string> = {
     높음: "#f04452",
 }
 
-interface RouteState {
-    originCoords?: LatLng
-    destinationCoords?: LatLng
+interface RouteResultsState {
+    routeId?: string
 }
 
 export function RouteResults() {
     const navigate = useNavigate()
     const location = useLocation()
-    const state = (location.state ?? null) as RouteState | null
+    const state = (location.state ?? null) as RouteResultsState | null
+    const routeId = state?.routeId
+
     const [sort, setSort] = React.useState<SortOption>("안전순")
     const [heatmap, setHeatmap] = React.useState(true)
-    const [routes, setRoutes] = React.useState<RouteCandidate[]>(routeCandidates)
+    const [selectedId, setSelectedId] = React.useState<string | null>(null)
+    const [syncedRouteId, setSyncedRouteId] = React.useState<string | null>(null)
+
+    const { data: route, isPending: routeLoading } = useRoute(routeId)
+    const selectOption = useSelectRouteOption(routeId ?? "")
+
+    const candidates: RouteCandidate[] = React.useMemo(
+        () => (route ? toRouteCandidates(route.options) : []),
+        [route]
+    )
+
+    if (route && route.route_id !== syncedRouteId) {
+        setSyncedRouteId(route.route_id)
+        const safe = candidates.find((candidate) => candidate.kind === "안전경로") ?? candidates[0]
+        setSelectedId(safe?.id ?? null)
+    }
+
+    const bbox = route ? buildBboxAround([route.origin, route.destination]) : undefined
+    const { data: riskSegmentsData } = useRiskSegments({ bbox })
+    const { data: restAreasData } = useRestAreas({ route_id: routeId })
+
+    const shownRiskSegments = (riskSegmentsData?.segments ?? [])
+        .map(toRiskSegment)
+        .filter((segment): segment is NonNullable<typeof segment> => segment !== null)
+        .slice(0, 2)
+
+    const restAreas = (restAreasData?.rest_areas ?? [])
+        .map(toRestArea)
+        .filter((restArea): restArea is NonNullable<typeof restArea> => restArea !== null)
 
     const handleSort = (next: SortOption) => {
         setSort(next)
-        setRoutes((current) =>
-            current.map((route) => ({
-                ...route,
-                is_selected: next === "안전순" ? route.kind === "안전경로" : route.kind === "최단경로",
-            }))
+        const match = candidates.find((candidate) =>
+            next === "안전순" ? candidate.kind === "안전경로" : candidate.kind === "최단경로"
         )
+        if (match) setSelectedId(match.id)
     }
 
-    const handleSelect = (id: string) => {
-        setRoutes((current) => current.map((route) => ({ ...route, is_selected: route.id === id })))
-    }
+    const handleSelect = (id: string) => setSelectedId(id)
 
+    const withSelection = candidates.map((candidate) => ({ ...candidate, is_selected: candidate.id === selectedId }))
     const ordered = React.useMemo(
         () =>
-            [...routes].sort((a, b) =>
+            [...withSelection].sort((a, b) =>
                 sort === "안전순" ? a.risk_score - b.risk_score : a.duration_sec - b.duration_sec
             ),
-        [routes, sort]
+        [withSelection, sort]
     )
 
-    const shownRiskSegments = riskSegments.slice(0, 2)
-    const currentPosition = state?.originCoords ?? DEFAULT_CENTER
-    const routePath =
-        state?.originCoords && state?.destinationCoords ? [state.originCoords, state.destinationCoords] : undefined
+    const currentPosition: LatLng = route?.origin ?? DEFAULT_CENTER
+    const routePath = route ? [route.origin, route.destination] : undefined
     const fitBounds = [
         currentPosition,
-        ...(state?.destinationCoords ? [state.destinationCoords] : []),
+        ...(route ? [route.destination] : []),
         ...shownRiskSegments,
-        restAreas[0],
+        ...restAreas.slice(0, 1),
     ]
+
+    const goToDetail = async () => {
+        if (!routeId || !selectedId) return
+        await selectOption.mutateAsync(selectedId)
+        navigate("/routes/detail", { state: { routeId } })
+    }
+
+    if (!routeId) {
+        return (
+            <div className="flex h-full min-h-0 flex-col">
+                <ScreenHeader title="경로 결과" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-4 px-5 text-center">
+                    <p className="text-[15px] text-ink-2">잘못된 접근이에요. 홈에서 다시 경로를 찾아 주세요.</p>
+                    <Button onClick={() => navigate("/")}>홈으로 돌아가기</Button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -91,7 +142,7 @@ export function RouteResults() {
                     <CurrentLocationMarker position={currentPosition} />
                     {shownRiskSegments.map((segment, index) => (
                         <MapMarker
-                            key={segment.road_name}
+                            key={segment.segment_id}
                             kind="risk"
                             position={segment}
                             delay={index * 0.05}
@@ -99,7 +150,14 @@ export function RouteResults() {
                         />
                     ))}
 
-                    <MapMarker kind="rest" position={restAreas[0]} delay={0.1} label={restAreas[0].rest_area_name} />
+                    {restAreas[0] ? (
+                        <MapMarker
+                            kind="rest"
+                            position={restAreas[0]}
+                            delay={0.1}
+                            label={restAreas[0].rest_area_name}
+                        />
+                    ) : null}
 
                     <div className="absolute left-4 top-4 z-20">
                         <HeatmapLegend />
@@ -132,13 +190,23 @@ export function RouteResults() {
                 </div>
 
                 <div className="flex flex-col gap-2.5">
-                    {ordered.map((route) => (
-                        <RouteCard key={route.id} route={route} onSelect={handleSelect} />
-                    ))}
+                    {routeLoading ? (
+                        <p className="py-6 text-center text-[14px] text-ink-3">경로를 불러오는 중...</p>
+                    ) : (
+                        ordered.map((candidate) => (
+                            <RouteCard key={candidate.id} route={candidate} onSelect={handleSelect} />
+                        ))
+                    )}
                 </div>
 
-                <Button size="lg" fullWidth className="mt-4" onClick={() => navigate("/routes/detail")}>
-                    경로 상세 보기
+                <Button
+                    size="lg"
+                    fullWidth
+                    className="mt-4"
+                    disabled={!selectedId || selectOption.isPending}
+                    onClick={goToDetail}
+                >
+                    {selectOption.isPending ? "선택하는 중..." : "경로 상세 보기"}
                 </Button>
             </div>
         </div>
