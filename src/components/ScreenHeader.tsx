@@ -16,7 +16,7 @@ export function ScreenHeader({ title, action, onBack }: ScreenHeaderProps) {
                 type="button"
                 onClick={onBack ?? (() => navigate(-1))}
                 aria-label="뒤로"
-                className="flex h-10 w-10 items-center justify-center rounded-btn text-ink transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors duration-150 ease-out hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
             >
                 <ChevronLeftIcon className="h-5.5 w-5.5" strokeWidth={2} />
             </button>

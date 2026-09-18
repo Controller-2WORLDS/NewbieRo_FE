@@ -68,7 +68,7 @@ export function PlaceSearch() {
                     type="button"
                     onClick={() => navigate(-1)}
                     aria-label="뒤로"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-btn text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink transition-colors duration-150 ease-out hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
                 >
                     <ChevronLeftIcon className="h-5 w-5" strokeWidth={2} />
                 </button>

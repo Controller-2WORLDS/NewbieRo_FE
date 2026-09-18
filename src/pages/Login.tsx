@@ -39,9 +39,19 @@ export function Login() {
                 </span>
             </header>
 
-            <h1 className="mt-6 text-[26px] font-bold leading-tight tracking-tight text-ink">
-                {mode === "로그인" ? "다시 만나서 반가워요" : "안전 운전을 시작해요"}
-            </h1>
+            <div className="relative -mx-5 overflow-hidden px-5 pb-3 pt-6">
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-grad-navy-soft blur-xl"
+                />
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -left-3 top-3 h-14 w-14 rounded-full bg-grad-navy-soft opacity-70"
+                />
+                <h1 className="relative text-[26px] font-bold leading-tight tracking-tight text-ink">
+                    {mode === "로그인" ? "다시 만나서 반가워요" : "안전 운전을 시작해요"}
+                </h1>
+            </div>
 
             <div className="mt-6">
                 <SegmentedControl label="인증 방식" size="sm" options={modes} value={mode} onChange={setMode} />

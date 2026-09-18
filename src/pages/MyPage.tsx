@@ -22,7 +22,7 @@ export function MyPage() {
                 <h1 className="text-[17px] font-bold tracking-[-0.02em] text-ink">마이페이지</h1>
             </header>
             <div className="px-5">
-                <Card className="mt-3">
+                <Card className="mt-3" accent>
                     <button
                         type="button"
                         onClick={() => navigate("/profile")}

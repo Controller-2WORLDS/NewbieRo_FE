@@ -42,7 +42,7 @@ export function TripReport() {
 
                 <section className="mt-9">
                     <h3 className="text-[18px] font-semibold tracking-tight text-ink">개선 팁</h3>
-                    <Card className="mt-3">
+                    <Card className="mt-3" accent>
                         <p className="text-[15px] leading-relaxed text-ink">{tripReport.tips}</p>
                     </Card>
                 </section>
