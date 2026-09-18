@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { AnimatePresence, motion } from "framer-motion"
 import { ChevronRightIcon, MoonIcon, SunIcon } from "lucide-react"
 import { Card } from "../components/ui/Card"
 import { StatCard } from "../components/ui/StatCard"
@@ -87,11 +88,33 @@ export function MyPage() {
                         aria-pressed={mode === "dark"}
                         className="flex w-full items-center gap-3 py-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
                     >
-                        {mode === "dark" ? (
-                            <MoonIcon className="h-4.5 w-4.5 text-ink-2" strokeWidth={2} />
-                        ) : (
-                            <SunIcon className="h-4.5 w-4.5 text-ink-2" strokeWidth={2} />
-                        )}
+                        <span className="relative block h-4.5 w-4.5 shrink-0">
+                            <AnimatePresence mode="wait" initial={false}>
+                                {mode === "dark" ? (
+                                    <motion.span
+                                        key="moon"
+                                        initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
+                                        animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                                        exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                                        className="absolute inset-0"
+                                    >
+                                        <MoonIcon className="h-4.5 w-4.5 text-ink-2" strokeWidth={2} />
+                                    </motion.span>
+                                ) : (
+                                    <motion.span
+                                        key="sun"
+                                        initial={{ rotate: 90, scale: 0.5, opacity: 0 }}
+                                        animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                                        exit={{ rotate: -90, scale: 0.5, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                                        className="absolute inset-0"
+                                    >
+                                        <SunIcon className="h-4.5 w-4.5 text-ink-2" strokeWidth={2} />
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </span>
                         <span className="flex-1 text-[15px] font-medium text-ink">다크 모드</span>
                         <span
                             className={[
