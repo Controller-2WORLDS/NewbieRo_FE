@@ -1,27 +1,82 @@
 import React from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { NavigationIcon } from "lucide-react"
 import { Button, Input, SegmentedControl } from "@shared/ui"
-import type { DriverType } from "@entities/user"
+import { extractApiErrorMessage } from "@shared/api/client"
+import { useAuth } from "@app/providers/AuthProvider"
+import { toApiDriverType, useLogin, useSignup, type DriverType } from "@entities/user"
 
 const modes = ["로그인", "회원가입"] as const
 type Mode = (typeof modes)[number]
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
 
+const MIN_PASSWORD_LENGTH = 8
+
+interface LocationState {
+    from?: { pathname: string }
+}
+
+interface LoginFormState {
+    email: string
+    password: string
+}
+
+const initialLoginForm: LoginFormState = { email: "", password: "" }
+
+interface SignupFormState {
+    name: string
+    email: string
+    password: string
+    birthDate: string
+    licenseIssueDate: string
+    driverType: DriverType
+}
+
+const initialSignupForm: SignupFormState = {
+    name: "",
+    email: "",
+    password: "",
+    birthDate: "",
+    licenseIssueDate: "",
+    driverType: "일반",
+}
+
 export function Login() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const auth = useAuth()
+    const login = useLogin()
+    const signup = useSignup()
+
     const [mode, setMode] = React.useState<Mode>("로그인")
-    const [name, setName] = React.useState("")
-    const [email, setEmail] = React.useState("")
-    const [birthDate, setBirthDate] = React.useState("")
-    const [licenseIssueDate, setLicenseIssueDate] = React.useState("")
-    const [driverType, setDriverType] = React.useState<DriverType>("일반")
-    const [touched, setTouched] = React.useState(false)
-    const [submitting, setSubmitting] = React.useState(false)
+
+    // 로그인/회원가입은 서로 다른 입력값을 다루므로 state를 완전히 분리해서,
+    // 한쪽 탭에 입력한 값이 다른 탭으로 넘어가지 않게 한다.
+    const [loginForm, setLoginForm] = React.useState<LoginFormState>(initialLoginForm)
+    const [signupForm, setSignupForm] = React.useState<SignupFormState>(initialSignupForm)
+    const [loginTouched, setLoginTouched] = React.useState(false)
+    const [signupTouched, setSignupTouched] = React.useState(false)
     const [apiError, setApiError] = React.useState<string | null>(null)
 
     const isSignup = mode === "회원가입"
+    const submitting = login.isPending || signup.isPending
+    const touched = isSignup ? signupTouched : loginTouched
+    const setTouched = isSignup ? setSignupTouched : setLoginTouched
+
+    const email = isSignup ? signupForm.email : loginForm.email
+    const password = isSignup ? signupForm.password : loginForm.password
+    const setEmail = (value: string) =>
+        isSignup ? setSignupForm((prev) => ({ ...prev, email: value })) : setLoginForm((prev) => ({ ...prev, email: value }))
+    const setPassword = (value: string) =>
+        isSignup
+            ? setSignupForm((prev) => ({ ...prev, password: value }))
+            : setLoginForm((prev) => ({ ...prev, password: value }))
+
+    const handleModeChange = (next: Mode) => {
+        setMode(next)
+        setApiError(null)
+    }
 
     const emailError = !touched
         ? undefined
@@ -30,29 +85,70 @@ export function Login() {
           : !email.includes("@")
             ? "이메일 형식을 확인해 주세요"
             : undefined
-    const nameError = touched && isSignup && name.trim().length === 0 ? "이름을 입력해 주세요" : undefined
-    const birthDateError = touched && isSignup && birthDate.length === 0 ? "생년월일을 입력해 주세요" : undefined
+    const passwordError = !touched
+        ? undefined
+        : password.length === 0
+          ? "비밀번호를 입력해 주세요"
+          : isSignup && password.length < MIN_PASSWORD_LENGTH
+            ? `비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상이어야 해요`
+            : undefined
+    const nameError =
+        signupTouched && isSignup && signupForm.name.trim().length === 0 ? "이름을 입력해 주세요" : undefined
+    const birthDateError =
+        signupTouched && isSignup && signupForm.birthDate.length === 0 ? "생년월일을 입력해 주세요" : undefined
     const licenseIssueDateError =
-        touched && isSignup && licenseIssueDate.length === 0 ? "면허 취득일을 입력해 주세요" : undefined
+        signupTouched && isSignup && signupForm.licenseIssueDate.length === 0
+            ? "면허 취득일을 입력해 주세요"
+            : undefined
 
     const isValid =
         email.trim().length > 0 &&
         email.includes("@") &&
-        (!isSignup || (name.trim().length > 0 && birthDate.length > 0 && licenseIssueDate.length > 0))
+        password.length > 0 &&
+        (!isSignup ||
+            (password.length >= MIN_PASSWORD_LENGTH &&
+                signupForm.name.trim().length > 0 &&
+                signupForm.birthDate.length > 0 &&
+                signupForm.licenseIssueDate.length > 0))
 
     const submit = async () => {
         setTouched(true)
         setApiError(null)
         if (!isValid) return
 
-        setSubmitting(true)
         try {
-            // navigate 자체는 실패하지 않지만, 실제 API 연동 후에는 이 지점에서 에러가 날 수 있다.
-            navigate("/")
-        } catch {
-            setApiError(isSignup ? "회원가입에 실패했어요. 잠시 후 다시 시도해 주세요." : "로그인에 실패했어요. 잠시 후 다시 시도해 주세요.")
-        } finally {
-            setSubmitting(false)
+            if (isSignup) {
+                await signup.mutateAsync({
+                    name: signupForm.name,
+                    email: signupForm.email,
+                    password: signupForm.password,
+                    birth_date: signupForm.birthDate,
+                    driver_type: toApiDriverType(signupForm.driverType),
+                    license_issue_date: signupForm.licenseIssueDate,
+                })
+
+                const { access_token } = await login.mutateAsync({
+                    email: signupForm.email,
+                    password: signupForm.password,
+                })
+                auth.login(access_token)
+            } else {
+                const { access_token } = await login.mutateAsync({
+                    email: loginForm.email,
+                    password: loginForm.password,
+                })
+                auth.login(access_token)
+            }
+
+            const state = location.state as LocationState | null
+            navigate(state?.from?.pathname ?? "/", { replace: true })
+        } catch (error) {
+            setApiError(
+                extractApiErrorMessage(
+                    error,
+                    isSignup ? "회원가입에 실패했어요. 잠시 후 다시 시도해 주세요." : "로그인에 실패했어요. 잠시 후 다시 시도해 주세요."
+                )
+            )
         }
     }
 
@@ -81,7 +177,7 @@ export function Login() {
             </div>
 
             <div className="mt-6">
-                <SegmentedControl label="인증 방식" size="sm" options={modes} value={mode} onChange={setMode} />
+                <SegmentedControl label="인증 방식" size="sm" options={modes} value={mode} onChange={handleModeChange} />
             </div>
 
             <div className="mt-6 flex flex-col gap-3">
@@ -96,12 +192,25 @@ export function Login() {
                     disabled={submitting}
                 />
 
+                <Input
+                    label="비밀번호"
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    error={passwordError}
+                    placeholder={isSignup ? `${MIN_PASSWORD_LENGTH}자 이상 입력하세요` : "비밀번호를 입력하세요"}
+                    autoComplete={isSignup ? "new-password" : "current-password"}
+                    disabled={submitting}
+                />
+
                 {isSignup ? (
                     <>
                         <Input
                             label="이름"
-                            value={name}
-                            onChange={(event) => setName(event.target.value)}
+                            value={signupForm.name}
+                            onChange={(event) =>
+                                setSignupForm((prev) => ({ ...prev, name: event.target.value }))
+                            }
                             error={nameError}
                             placeholder="이름을 입력하세요"
                             autoComplete="name"
@@ -111,8 +220,10 @@ export function Login() {
                         <Input
                             label="생년월일"
                             type="date"
-                            value={birthDate}
-                            onChange={(event) => setBirthDate(event.target.value)}
+                            value={signupForm.birthDate}
+                            onChange={(event) =>
+                                setSignupForm((prev) => ({ ...prev, birthDate: event.target.value }))
+                            }
                             error={birthDateError}
                             disabled={submitting}
                         />
@@ -120,8 +231,10 @@ export function Login() {
                         <Input
                             label="면허 취득일"
                             type="date"
-                            value={licenseIssueDate}
-                            onChange={(event) => setLicenseIssueDate(event.target.value)}
+                            value={signupForm.licenseIssueDate}
+                            onChange={(event) =>
+                                setSignupForm((prev) => ({ ...prev, licenseIssueDate: event.target.value }))
+                            }
                             error={licenseIssueDateError}
                             disabled={submitting}
                         />
@@ -131,8 +244,8 @@ export function Login() {
                             <SegmentedControl
                                 label="운전자 유형"
                                 options={driverTypes}
-                                value={driverType}
-                                onChange={setDriverType}
+                                value={signupForm.driverType}
+                                onChange={(value) => setSignupForm((prev) => ({ ...prev, driverType: value }))}
                             />
                         </div>
                     </>
