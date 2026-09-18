@@ -125,10 +125,11 @@ export function MyPage() {
                             ].join(" ")}
                             aria-hidden="true"
                         >
-                            <span
+                            <motion.span
+                                layout
+                                transition={{ type: "spring", stiffness: 700, damping: 32 }}
                                 className={[
-                                    "absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-card",
-                                    "transition-[left] duration-300 ease-out",
+                                    "absolute top-0.75 h-5 w-5 rounded-full bg-white shadow-card",
                                     mode === "dark" ? "left-5.75" : "left-0.75",
                                 ].join(" ")}
                             />
