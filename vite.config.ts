@@ -1,11 +1,24 @@
+import path from 'node:path'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 
+const rootDir = import.meta.dirname
+
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@app': path.resolve(rootDir, 'src/app'),
+      '@pages': path.resolve(rootDir, 'src/pages'),
+      '@widgets': path.resolve(rootDir, 'src/widgets'),
+      '@entities': path.resolve(rootDir, 'src/entities'),
+      '@shared': path.resolve(rootDir, 'src/shared'),
+      '@mocks': path.resolve(rootDir, 'src/mocks'),
+    },
+  },
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
