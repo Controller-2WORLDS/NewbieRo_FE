@@ -104,7 +104,7 @@ export function Home() {
             <div className="absolute inset-x-0 top-0 z-20 px-4 pt-3">
                 <button
                     type="button"
-                    onClick={() => navigate("/search")}
+                    onClick={() => (destination ? setSheetOpen(true) : navigate("/search"))}
                     className="flex h-13.5 w-full items-center gap-2.5 rounded-btn border border-line-soft bg-grad-sheen px-4 shadow-lifted-inset backdrop-blur-xl transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
                 >
                     <NavigationIcon className="h-4.5 w-4.5 shrink-0 text-navy" strokeWidth={2.2} aria-hidden="true" />
