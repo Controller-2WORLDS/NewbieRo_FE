@@ -62,7 +62,6 @@ export function Home() {
         // 즉시 마커를 찍고 부드럽게 그 위치로 이동해 탭이 인식됐다는 피드백을 먼저 준다.
         setDestinationCoords(position)
         setDestination("선택한 위치")
-        setSheetOpen(true)
         mapRef.current?.panTo(new kakao.maps.LatLng(position.lat, position.lng))
 
         // 근처에 건물/단지명이 있으면 주소보다 그 이름을 우선해서 보여준다.
@@ -102,23 +101,31 @@ export function Home() {
             </MapPlaceholder>
 
             <div className="absolute inset-x-0 top-0 z-20 px-4 pt-3">
-                <button
-                    type="button"
-                    onClick={() => (destination ? setSheetOpen(true) : navigate("/search"))}
-                    className="flex h-13.5 w-full items-center gap-2.5 rounded-btn border border-line-soft bg-grad-sheen px-4 shadow-lifted-inset backdrop-blur-xl transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
-                >
-                    <NavigationIcon className="h-4.5 w-4.5 shrink-0 text-navy" strokeWidth={2.2} aria-hidden="true" />
-
-                    <span
-                        className={[
-                            "flex-1 truncate text-left text-[15px]",
-                            destination ? "font-medium text-ink" : "text-ink-3",
-                        ].join(" ")}
+                <div className="flex h-13.5 w-full items-center gap-1 rounded-btn border border-line-soft bg-grad-sheen pl-4 pr-1.5 shadow-lifted-inset backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-150 ease-out">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/search")}
+                        className="flex min-w-0 flex-1 items-center gap-2.5 py-2 text-left focus-visible:outline-none"
                     >
-                        {destination || "어디로 갈까요?"}
-                    </span>
-                    <SearchIcon className="h-4.5 w-4.5 shrink-0 text-accent" strokeWidth={2.2} aria-hidden="true" />
-                </button>
+                        <NavigationIcon className="h-4.5 w-4.5 shrink-0 text-navy" strokeWidth={2.2} aria-hidden="true" />
+                        <span
+                            className={[
+                                "flex-1 truncate text-[15px]",
+                                destination ? "font-medium text-ink" : "text-ink-3",
+                            ].join(" ")}
+                        >
+                            {destination || "어디로 갈까요?"}
+                        </span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setSheetOpen(true)}
+                        aria-label="경로 찾기"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-accent transition-[transform,background-color] duration-150 ease-out active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+                    >
+                        <SearchIcon className="h-4.5 w-4.5" strokeWidth={2.2} aria-hidden="true" />
+                    </button>
+                </div>
             </div>
 
             <div className="absolute bottom-5 right-4 z-20">
