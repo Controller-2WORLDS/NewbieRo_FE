@@ -111,7 +111,7 @@ export interface ApiRiskSegment {
 export interface ListRiskSegmentsQuery {
     bbox?: string
     time_band?: string
-    accident_type?: string
+    segment_type?: ApiSegmentType
 }
 
 export interface ListRiskSegmentsResponse {
