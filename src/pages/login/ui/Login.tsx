@@ -1,6 +1,5 @@
 import React from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { NavigationIcon } from "lucide-react"
 import { Button, Input, SegmentedControl } from "@shared/ui"
 import { extractApiErrorMessage } from "@shared/api/client"
 import { useAuth } from "@app/providers/AuthProvider"
@@ -51,8 +50,6 @@ export function Login() {
 
     const [mode, setMode] = React.useState<Mode>("로그인")
 
-    // 로그인/회원가입은 서로 다른 입력값을 다루므로 state를 완전히 분리해서,
-    // 한쪽 탭에 입력한 값이 다른 탭으로 넘어가지 않게 한다.
     const [loginForm, setLoginForm] = React.useState<LoginFormState>(initialLoginForm)
     const [signupForm, setSignupForm] = React.useState<SignupFormState>(initialSignupForm)
     const [loginTouched, setLoginTouched] = React.useState(false)
@@ -67,7 +64,9 @@ export function Login() {
     const email = isSignup ? signupForm.email : loginForm.email
     const password = isSignup ? signupForm.password : loginForm.password
     const setEmail = (value: string) =>
-        isSignup ? setSignupForm((prev) => ({ ...prev, email: value })) : setLoginForm((prev) => ({ ...prev, email: value }))
+        isSignup
+            ? setSignupForm((prev) => ({ ...prev, email: value }))
+            : setLoginForm((prev) => ({ ...prev, email: value }))
     const setPassword = (value: string) =>
         isSignup
             ? setSignupForm((prev) => ({ ...prev, password: value }))
@@ -146,7 +145,9 @@ export function Login() {
             setApiError(
                 extractApiErrorMessage(
                     error,
-                    isSignup ? "회원가입에 실패했어요. 잠시 후 다시 시도해 주세요." : "로그인에 실패했어요. 잠시 후 다시 시도해 주세요."
+                    isSignup
+                        ? "회원가입에 실패했어요. 잠시 후 다시 시도해 주세요."
+                        : "로그인에 실패했어요. 잠시 후 다시 시도해 주세요."
                 )
             )
         }
@@ -155,11 +156,7 @@ export function Login() {
     return (
         <main className="flex h-full min-h-0 flex-col overflow-y-auto no-scrollbar px-5 pb-8">
             <header className="sticky top-0 z-20 -mx-5 flex h-14 items-center border-b border-line-soft bg-grad-header px-5 shadow-card backdrop-blur-xl">
-                <span className="flex items-center gap-2">
-                    <NavigationIcon className="h-4.5 w-4.5 text-navy" strokeWidth={2.2} aria-hidden="true" />
-
-                    <span className="text-[17px] font-bold tracking-tight text-ink">뉴비로</span>
-                </span>
+                <img src="/Logo.svg" alt="뉴비로" className="h-10 w-10 mt-3" />
             </header>
 
             <div className="relative -mx-5 overflow-hidden px-5 pb-3 pt-6">
@@ -177,7 +174,13 @@ export function Login() {
             </div>
 
             <div className="mt-6">
-                <SegmentedControl label="인증 방식" size="sm" options={modes} value={mode} onChange={handleModeChange} />
+                <SegmentedControl
+                    label="인증 방식"
+                    size="sm"
+                    options={modes}
+                    value={mode}
+                    onChange={handleModeChange}
+                />
             </div>
 
             <div className="mt-6 flex flex-col gap-3">
@@ -208,9 +211,7 @@ export function Login() {
                         <Input
                             label="이름"
                             value={signupForm.name}
-                            onChange={(event) =>
-                                setSignupForm((prev) => ({ ...prev, name: event.target.value }))
-                            }
+                            onChange={(event) => setSignupForm((prev) => ({ ...prev, name: event.target.value }))}
                             error={nameError}
                             placeholder="이름을 입력하세요"
                             autoComplete="name"
@@ -221,9 +222,7 @@ export function Login() {
                             label="생년월일"
                             type="date"
                             value={signupForm.birthDate}
-                            onChange={(event) =>
-                                setSignupForm((prev) => ({ ...prev, birthDate: event.target.value }))
-                            }
+                            onChange={(event) => setSignupForm((prev) => ({ ...prev, birthDate: event.target.value }))}
                             error={birthDateError}
                             disabled={submitting}
                         />
@@ -253,7 +252,10 @@ export function Login() {
             </div>
 
             {apiError ? (
-                <p role="alert" className="mt-4 rounded-btn border border-danger/30 bg-danger-tint px-3.5 py-2.5 text-[13px] font-medium text-danger">
+                <p
+                    role="alert"
+                    className="mt-4 rounded-btn border border-danger/30 bg-danger-tint px-3.5 py-2.5 text-[13px] font-medium text-danger"
+                >
                     {apiError}
                 </p>
             ) : null}
