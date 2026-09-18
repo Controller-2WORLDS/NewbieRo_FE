@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useLocation, useNavigate } from "react-router-dom"
 import { MoonIcon, XIcon } from "lucide-react"
 import { MapPlaceholder, MapMarker, CurrentLocationMarker } from "@widgets/kakao-map"
-import { AlertBanner, useCreateDrivingReport } from "@entities/trip"
+import { AlertBanner, useCreateAlert, useCreateDrivingReport } from "@entities/trip"
 import {
     RestAreaCongestionBadge,
     toRestArea,
@@ -37,6 +37,7 @@ export function DriveMode() {
     const [currentPosition, setCurrentPosition] = React.useState<LatLng | null>(null)
 
     const createReport = useCreateDrivingReport()
+    const createAlert = useCreateAlert()
     const { data: route } = useRoute(routeId)
     const bbox = route ? buildBboxAround([route.origin, route.destination]) : undefined
     const { data: riskSegmentsData } = useRiskSegments({ bbox })
@@ -53,11 +54,26 @@ export function DriveMode() {
     const nearestRiskSegment = findNearestWithin(position, riskSegments, ALERT_RADIUS_M)
     const nearestRestArea = findNearestWithin(position, restAreas, REST_AREA_RADIUS_M)
 
+    // 같은 위험구간에 대해 경고 배너가 다시 그려질 때마다 중복 기록하지 않도록, 마지막으로 기록한 구간을 추적한다.
+    const alertedSegmentIdRef = React.useRef<string | null>(null)
+
     React.useEffect(() => {
         getCurrentPosition()
             .then(setCurrentPosition)
             .catch(() => setCurrentPosition(null))
     }, [])
+
+    React.useEffect(() => {
+        if (!routeId || !nearestRiskSegment) return
+        if (alertedSegmentIdRef.current === nearestRiskSegment.segment_id) return
+        alertedSegmentIdRef.current = nearestRiskSegment.segment_id
+        createAlert.mutate({
+            route_id: routeId,
+            segment_id: nearestRiskSegment.segment_id,
+            alert_type: "사고다발구간",
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [routeId, nearestRiskSegment?.segment_id])
 
     React.useEffect(() => {
         if (!nearestRestArea) return

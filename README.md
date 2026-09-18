@@ -319,6 +319,7 @@ erDiagram
 | 졸음쉼터 | GET    | /api/rest-areas                           | 경로 상 졸음쉼터 목록 조회      | route_id 또는 bbox                                                 | rest_areas[](rest_area_id, facility_seq, name, lat, lng, capacity)                                                               |
 | 졸음쉼터 | GET    | /api/rest-areas/{rest_area_id}/congestion | 시간대별 예상 혼잡도 조회       | rest_area_id, time_band, day_type                                  | rest_area_id, time_band, predicted_occupancy_rate                                                                                |
 | 알림     | GET    | /api/alerts                               | 프로필 기반 진입 경고 이력 조회 | user_id(인증), route_id                                            | alerts[](alert_id, segment_id, alert_type, triggered_at)                                                                         |
+| 알림     | POST   | /api/alerts                               | 주행 중 위험구간 진입 경고 기록 (v2.1 추가) | route_id, segment_id(선택), alert_type                             | alert_id, segment_id, alert_type, triggered_at                                                                                   |
 | 리포트   | POST   | /api/driving-reports                      | 주행 종료 후 리포트 생성        | route_id, driven_at, gps_track                                     | report_id, risk_segments_passed, total_risk_score, tips                                                                          |
 | 리포트   | GET    | /api/driving-reports/{report_id}          | 운행 리포트 상세 조회           | report_id (path)                                                   | report_id, driven_at, risk_segments_passed, total_risk_score, tips                                                               |
 | 리포트   | GET    | /api/driving-reports/summary              | 마이페이지 누적 통계 조회       | user_id(인증), period                                              | total_trips, total_risk_segments_passed, avg_risk_score, trend[]                                                                 |
@@ -328,8 +329,9 @@ erDiagram
 1. **경로 검색**: `POST /api/routes` → `options[]` 중 하나를 `POST /api/routes/{route_id}/select`
 2. **경로 상세 확인**: `GET /api/routes/{route_id}` + `GET /api/risk-segments?bbox=...`
 3. **졸음쉼터 확인**: `GET /api/rest-areas?route_id=...` → `GET /api/rest-areas/{rest_area_id}/congestion`
-4. **주행 종료 후**: `POST /api/driving-reports` → `GET /api/driving-reports/{report_id}`
-5. **마이페이지**: `GET /api/driving-reports/summary` + `GET /api/routes/history`
+4. **주행 중 위험구간 진입**: 위험구간 300m 이내 진입 시 경고 배너 표시와 함께 `POST /api/alerts`로 진입 이력 기록
+5. **주행 종료 후**: `POST /api/driving-reports` → `GET /api/driving-reports/{report_id}`
+6. **마이페이지**: `GET /api/driving-reports/summary` + `GET /api/routes/history`
 
 ---
 

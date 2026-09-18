@@ -43,3 +43,9 @@ export interface ListAlertsQuery {
 export interface ListAlertsResponse {
     alerts: AlertEntry[]
 }
+
+export interface CreateAlertRequest {
+    route_id: string
+    segment_id?: string
+    alert_type: string
+}
