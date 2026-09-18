@@ -494,3 +494,23 @@ erDiagram
 4. **API는 6번 섹션의 명세를 기준으로 mock 서버(json-server 등) 또는 실제 백엔드로 구현**. 아직 라우팅 엔진(OSRM) 연동 전이면, `/api/routes` 응답은 하드코딩된 2개 경로 후보로 우선 구현해도 됨.
 5. 데이터 표시 원칙(7번 섹션 마지막)을 반드시 지킬 것 — 존재하지 않는 데이터(평점, 가격, 게이미피케이션 등)를 임의로 추가하지 말 것.
 6. PWA 전환은 핵심 기능이 다 완성된 뒤 마지막에 진행 (manifest.json + service worker 추가).
+
+---
+
+## 13. 배포 전 확인사항
+
+현재(개발 단계) 상태 기준으로, 실제 운영 환경에 배포하기 전 아래 항목을 반드시 점검할 것.
+
+### 보안
+
+- [ ] **CORS 화이트리스트**: `main.ts`의 `CORS_ORIGINS` 환경변수를 운영 FE 도메인(예: `https://newbiero.app`)으로 설정. 로컬 개발용 `localhost` 주소가 운영 환경변수에 섞여 들어가지 않도록 확인.
+- [ ] **helmet 적용**: 현재 기본 보안 헤더 미들웨어(`helmet`)가 붙어있지 않음. `npm i helmet` 후 `main.ts`의 `app.enableCors()` 근처에 `app.use(helmet())` 추가 필요.
+- [ ] **환경변수 정리**: `.env`의 `JWT_SECRET`이 `change-me-in-production` 같은 개발용 placeholder로 남아있지 않은지 확인하고, 운영 환경에서는 충분히 긴 랜덤 값으로 교체. `DATABASE_URL`의 DB 계정도 운영 전용 계정(최소 권한)으로 분리.
+- [ ] **HTTPS 강제**: 운영 도메인은 HTTPS로만 서빙하고, `Authorization: Bearer` 토큰이 평문 HTTP로 오가지 않도록 확인.
+- [ ] **Rate limiting**: 로그인/회원가입 등 무차별 대입 공격에 노출되는 엔드포인트에 요청 제한이 아직 없음. `@nestjs/throttler` 등 도입 검토.
+
+### 그 외
+
+- [ ] `routes.service.ts`의 mock 라우팅 로직(`TODO: OSRM 연동 후 교체` 주석 참고)을 실제 라우팅 엔진 연동으로 교체했는지 확인.
+- [ ] 안심구역에서 반출한 실제 데이터로 `risk_segment_template.csv` / `rest_area_congestion_template.csv` 기반 seed를 교체했는지 확인.
+- [ ] BE 유닛/e2e 테스트가 auth·routes·risk-segments 등 핵심 도메인을 실제로 커버하는지 재점검(현재는 boilerplate 수준).
