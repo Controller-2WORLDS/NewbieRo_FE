@@ -59,11 +59,22 @@ export function Home() {
     }
 
     const handleMapClick = async (position: LatLng) => {
+        // 즉시 마커를 찍고 부드럽게 그 위치로 이동해 탭이 인식됐다는 피드백을 먼저 준다.
         setDestinationCoords(position)
         setDestination("선택한 위치")
-        setSheetOpen(true)
-        const address = await reverseGeocode(position).catch(() => null)
-        if (address) setDestination(address)
+        mapRef.current?.panTo(new kakao.maps.LatLng(position.lat, position.lng))
+
+        // 근처에 건물/단지명이 있으면 주소보다 그 이름으로, 바로 경로 찾기로 넘어간다.
+        const result = await reverseGeocode(position).catch(() => null)
+        const label = result?.label ?? "선택한 위치"
+        navigate("/routes", {
+            state: {
+                origin,
+                destination: label,
+                originCoords: origin === "현재 위치" ? currentPosition : undefined,
+                destinationCoords: position,
+            },
+        })
     }
 
     const findSafeRoute = () => {

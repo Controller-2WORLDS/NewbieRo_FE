@@ -48,8 +48,16 @@ export function searchPlacesByKeyword(keyword: string): Promise<PlaceSearchResul
     })
 }
 
-/** Reverse geocode a coordinate into a readable address (e.g. for "현재 위치"). */
-export function reverseGeocode(position: LatLng): Promise<string | null> {
+export interface ReverseGeocodeResult {
+    /** 표시용 라벨 — 건물/단지명이 있으면 그걸 우선하고, 없으면 주소. */
+    label: string
+    address: string
+    buildingName: string | null
+}
+
+/** Reverse geocode a coordinate into a readable address (e.g. for "현재 위치").
+ * 도로명주소에 건물명(예: "롯데월드타워")이 있으면 주소보다 그 이름을 우선한다. */
+export function reverseGeocode(position: LatLng): Promise<ReverseGeocodeResult | null> {
     return new Promise((resolve, reject) => {
         if (!servicesReady()) {
             reject(new Error("카카오맵이 아직 준비되지 않았습니다."))
@@ -59,8 +67,13 @@ export function reverseGeocode(position: LatLng): Promise<string | null> {
         const geocoder = new kakao.maps.services.Geocoder()
         geocoder.coord2Address(position.lng, position.lat, (result, status) => {
             if (status === kakao.maps.services.Status.OK && result[0]) {
-                const address = result[0].road_address?.address_name ?? result[0].address?.address_name ?? null
-                resolve(address)
+                const address = result[0].road_address?.address_name ?? result[0].address?.address_name ?? ""
+                const buildingName = result[0].road_address?.building_name || null
+                if (!address && !buildingName) {
+                    resolve(null)
+                    return
+                }
+                resolve({ label: buildingName || address, address, buildingName })
                 return
             }
             resolve(null)
