@@ -221,31 +221,20 @@ export function Home() {
                 onClose={() => setLocationPromptOpen(false)}
                 title="위치 권한이 필요해요"
                 footer={
-                    locationDenied ? (
-                        <Button size="lg" fullWidth onClick={() => setLocationPromptOpen(false)}>
-                            확인
+                    <div className="flex gap-2.5">
+                        <Button variant="secondary" size="lg" fullWidth onClick={() => setLocationPromptOpen(false)}>
+                            나중에
                         </Button>
-                    ) : (
-                        <div className="flex gap-2.5">
-                            <Button
-                                variant="secondary"
-                                size="lg"
-                                fullWidth
-                                onClick={() => setLocationPromptOpen(false)}
-                            >
-                                나중에
-                            </Button>
-                            <Button size="lg" fullWidth onClick={requestLocationAccess}>
-                                위치 허용하기
-                            </Button>
-                        </div>
-                    )
+                        <Button size="lg" fullWidth onClick={requestLocationAccess}>
+                            위치 허용하기
+                        </Button>
+                    </div>
                 }
             >
                 <p className="text-[15px] leading-relaxed text-ink-2">
                     {locationDenied
-                        ? "위치 접근이 차단되어 있어요. 브라우저 설정에서 뉴비로의 위치 권한을 허용한 뒤 다시 시도해 주세요."
-                        : "현재 위치를 기반으로 실시간 안전 경로와 위험구간 알림을 제공하려면 위치 권한이 필요해요."}
+                        ? "위치 접근이 차단되어 있어요. 허용하기를 다시 눌러 보고, 그래도 안 되면 주소창의 위치 아이콘을 눌러 권한을 허용해 주세요."
+                        : "현재 위치를 기반으로 실시간 안전 경로와 위험구간 알림을 제공하려면 위치 권한이 필요해요. 허용하기를 누르면 브라우저 권한 요청 창이 떠요."}
                 </p>
             </Modal>
         </div>
