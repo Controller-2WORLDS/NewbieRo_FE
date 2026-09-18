@@ -3,16 +3,32 @@ import { AnimatePresence, motion } from "framer-motion"
 import { ChevronRightIcon, MoonIcon, SunIcon } from "lucide-react"
 import { Card, StatCard } from "@shared/ui"
 import { riskLevel } from "@shared/lib/risk"
-import { RiskBadge, RouteHistoryItem } from "@entities/route"
-import { TrendChart, readStoredDriverType } from "@entities/user"
-import { profile, routeHistory, userStats } from "@mocks/safero"
+import { coordinateLabel, RiskBadge, RouteHistoryItem, useRouteHistory } from "@entities/route"
+import type { RouteQuery } from "@entities/route"
+import { TrendChart, fromApiDriverType, useMe } from "@entities/user"
+import { useDrivingReportSummary } from "@entities/trip"
 import { useTheme } from "@app/providers/ThemeProvider"
 
 export function MyPage() {
     const navigate = useNavigate()
     const { mode, toggle } = useTheme()
-    const driverType = readStoredDriverType() ?? profile.driver_type
+    const { data: me, isPending: meLoading } = useMe()
+    const { data: summary } = useDrivingReportSummary()
+    const { data: history } = useRouteHistory({ size: 10 })
+
+    const driverType = me ? fromApiDriverType(me.driver_type) : "일반"
     const isSenior = driverType === "고령"
+
+    const routeHistory: RouteQuery[] =
+        history?.routes.map((route) => ({
+            origin: coordinateLabel(route.origin, "출발지"),
+            destination: coordinateLabel(route.destination, "도착지"),
+            requested_at: route.requested_at,
+            origin_lat: route.origin.lat,
+            origin_lng: route.origin.lng,
+            destination_lat: route.destination.lat,
+            destination_lng: route.destination.lng,
+        })) ?? []
 
     return (
         <main className="h-full overflow-y-auto no-scrollbar pb-10">
@@ -32,7 +48,7 @@ export function MyPage() {
                                 isSenior ? "h-14 w-14 text-[20px]" : "h-12 w-12 text-[17px]",
                             ].join(" ")}
                         >
-                            {profile.name.slice(0, 1)}
+                            {(me?.name ?? "").slice(0, 1)}
                         </span>
                         <span className="min-w-0 flex-1">
                             <span
@@ -41,7 +57,7 @@ export function MyPage() {
                                     isSenior ? "text-[23px] font-bold" : "text-[18px] font-semibold",
                                 ].join(" ")}
                             >
-                                {profile.name}
+                                {meLoading ? "불러오는 중..." : me?.name}
                             </span>
                             <span
                                 className={[
@@ -57,26 +73,33 @@ export function MyPage() {
                 </Card>
 
                 <div className="mt-7 grid grid-cols-3 gap-2.5">
-                    <StatCard label="총 주행" value={userStats.total_trips} unit="회" />
-                    <StatCard label="누적 위험구간" value={userStats.total_risk_segments_passed} unit="곳" />
+                    <StatCard label="총 주행" value={summary?.total_trips ?? 0} unit="회" />
+                    <StatCard label="누적 위험구간" value={summary?.total_risk_segments_passed ?? 0} unit="곳" />
 
-                    <StatCard label="평균 위험도" value={<RiskBadge level={riskLevel(userStats.avg_risk_score)} />} />
+                    <StatCard
+                        label="평균 위험도"
+                        value={<RiskBadge level={riskLevel(summary?.avg_risk_score ?? 0)} />}
+                    />
                 </div>
 
                 <section className="mt-9">
                     <h2 className="text-[18px] font-semibold tracking-tight text-ink">평균 위험도 추이</h2>
                     <Card className="mt-3">
-                        <TrendChart trend={userStats.trend} />
+                        <TrendChart trend={summary?.trend ?? []} />
                     </Card>
                 </section>
 
                 <section className="mt-9">
                     <h2 className="text-[18px] font-semibold tracking-tight text-ink">경로 이력</h2>
-                    <ul className="mt-1 divide-y divide-line">
-                        {routeHistory.map((query) => (
-                            <RouteHistoryItem key={query.requested_at} query={query} />
-                        ))}
-                    </ul>
+                    {routeHistory.length > 0 ? (
+                        <ul className="mt-1 divide-y divide-line">
+                            {routeHistory.map((query) => (
+                                <RouteHistoryItem key={query.requested_at} query={query} />
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="mt-3 text-[14px] text-ink-3">아직 경로 이력이 없어요.</p>
+                    )}
                 </section>
 
                 <div className="mt-9 border-t border-line pt-3">

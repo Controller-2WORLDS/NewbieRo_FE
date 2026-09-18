@@ -3,8 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { CrosshairIcon, NavigationIcon, SearchIcon } from "lucide-react"
 import { MapPlaceholder, CurrentLocationMarker, MapMarker } from "@widgets/kakao-map"
 import { BottomSheet, Button, Input, Modal, SegmentedControl } from "@shared/ui"
-import { profile } from "@mocks/safero"
-import { readStoredDriverType, type DriverType } from "@entities/user"
+import { fromApiDriverType, toApiDriverType, useMe, type DriverType } from "@entities/user"
+import { useCreateRoute } from "@entities/route"
+import { extractApiErrorMessage } from "@shared/api/client"
 import { getCurrentPosition, getGeolocationPermissionState, reverseGeocode, type LatLng } from "@shared/api/kakao"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
@@ -25,6 +26,8 @@ export function Home() {
     const navigate = useNavigate()
     const location = useLocation()
     const selection = (location.state ?? null) as PlaceSelection | null
+    const { data: me } = useMe()
+    const createRoute = useCreateRoute()
 
     const [origin, setOrigin] = React.useState(selection?.origin ?? "현재 위치")
     const [destination, setDestination] = React.useState(selection?.destination ?? "")
@@ -32,11 +35,20 @@ export function Home() {
         selection?.destinationCoords ?? null
     )
     const [currentPosition, setCurrentPosition] = React.useState<LatLng | null>(null)
-    const [driverType, setDriverType] = React.useState<DriverType>(() => readStoredDriverType() ?? profile.driver_type)
+    const [driverType, setDriverType] = React.useState<DriverType>("일반")
+    const [syncedDriverTypeUserId, setSyncedDriverTypeUserId] = React.useState<string | null>(null)
     const [sheetOpen, setSheetOpen] = React.useState(Boolean(selection?.destination))
     const [locationPromptOpen, setLocationPromptOpen] = React.useState(false)
     const [locationDenied, setLocationDenied] = React.useState(false)
+    const [routeError, setRouteError] = React.useState<string | null>(null)
+    const [syncedSelection, setSyncedSelection] = React.useState(selection)
     const mapRef = React.useRef<kakao.maps.Map | null>(null)
+
+    // 내 프로필의 운전자 유형을 기본값으로 반영한다(이후 이 화면에서 바꾼 값은 그대로 유지).
+    if (me && me.user_id !== syncedDriverTypeUserId) {
+        setSyncedDriverTypeUserId(me.user_id)
+        setDriverType(fromApiDriverType(me.driver_type))
+    }
 
     React.useEffect(() => {
         let cancelled = false
@@ -85,13 +97,14 @@ export function Home() {
             .catch(() => setLocationDenied(true))
     }
 
-    React.useEffect(() => {
-        if (!selection?.destination) return
+    // 장소 검색 화면에서 새 목적지를 들고 돌아왔을 때만(최초 마운트 이후) 반영한다.
+    if (selection?.destination && selection !== syncedSelection) {
+        setSyncedSelection(selection)
         setOrigin(selection.origin ?? "현재 위치")
         setDestination(selection.destination)
         setDestinationCoords(selection.destinationCoords ?? null)
         setSheetOpen(true)
-    }, [selection?.destination, selection?.origin, selection?.destinationCoords])
+    }
 
     const centerOnCurrentPosition = () => {
         if (!currentPosition || !mapRef.current) return
@@ -109,15 +122,24 @@ export function Home() {
         if (result?.label) setDestination(result.label)
     }
 
-    const findSafeRoute = () => {
-        navigate("/routes", {
-            state: {
-                origin,
-                destination,
-                originCoords: origin === "현재 위치" ? currentPosition : undefined,
-                destinationCoords,
-            },
-        })
+    const findSafeRoute = async () => {
+        const originCoords = origin.trim() === "현재 위치" ? currentPosition : null
+        if (!originCoords || !destinationCoords) {
+            setRouteError("출발지와 도착지 위치를 확인할 수 없어요. 지도를 눌러 도착지를 선택해 주세요.")
+            return
+        }
+
+        setRouteError(null)
+        try {
+            const result = await createRoute.mutateAsync({
+                origin: { ...originCoords, address: origin },
+                destination: { ...destinationCoords, address: destination },
+                profile_used: toApiDriverType(driverType),
+            })
+            navigate("/routes", { state: { routeId: result.route_id } })
+        } catch (error) {
+            setRouteError(extractApiErrorMessage(error, "경로를 찾지 못했어요. 잠시 후 다시 시도해 주세요."))
+        }
     }
 
     return (
@@ -203,8 +225,20 @@ export function Home() {
                         />
                     </div>
 
-                    <Button size="lg" fullWidth className="mt-6" onClick={findSafeRoute}>
-                        안전 경로 찾기
+                    {routeError ? (
+                        <p role="alert" className="mt-4 rounded-btn border border-danger/30 bg-danger-tint px-3.5 py-2.5 text-[13px] font-medium text-danger">
+                            {routeError}
+                        </p>
+                    ) : null}
+
+                    <Button
+                        size="lg"
+                        fullWidth
+                        className="mt-6"
+                        disabled={createRoute.isPending}
+                        onClick={findSafeRoute}
+                    >
+                        {createRoute.isPending ? "찾는 중..." : "안전 경로 찾기"}
                     </Button>
                 </div>
             </BottomSheet>
