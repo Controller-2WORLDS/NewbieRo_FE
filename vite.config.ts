@@ -16,7 +16,6 @@ export default defineConfig({
       '@widgets': path.resolve(rootDir, 'src/widgets'),
       '@entities': path.resolve(rootDir, 'src/entities'),
       '@shared': path.resolve(rootDir, 'src/shared'),
-      '@mocks': path.resolve(rootDir, 'src/mocks'),
     },
   },
   plugins: [
