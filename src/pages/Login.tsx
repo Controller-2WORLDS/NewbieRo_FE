@@ -20,13 +20,42 @@ export function Login() {
     const [licenseIssueDate, setLicenseIssueDate] = React.useState("")
     const [driverType, setDriverType] = React.useState<DriverType>("일반")
     const [touched, setTouched] = React.useState(false)
+    const [submitting, setSubmitting] = React.useState(false)
+    const [apiError, setApiError] = React.useState<string | null>(null)
 
-    const emailError = touched && email.length > 0 && !email.includes("@") ? "이메일 형식을 확인해 주세요" : undefined
+    const isSignup = mode === "회원가입"
 
-    const submit = () => {
+    const emailError = !touched
+        ? undefined
+        : email.trim().length === 0
+          ? "이메일을 입력해 주세요"
+          : !email.includes("@")
+            ? "이메일 형식을 확인해 주세요"
+            : undefined
+    const nameError = touched && isSignup && name.trim().length === 0 ? "이름을 입력해 주세요" : undefined
+    const birthDateError = touched && isSignup && birthDate.length === 0 ? "생년월일을 입력해 주세요" : undefined
+    const licenseIssueDateError =
+        touched && isSignup && licenseIssueDate.length === 0 ? "면허 취득일을 입력해 주세요" : undefined
+
+    const isValid =
+        email.trim().length > 0 &&
+        email.includes("@") &&
+        (!isSignup || (name.trim().length > 0 && birthDate.length > 0 && licenseIssueDate.length > 0))
+
+    const submit = async () => {
         setTouched(true)
-        if (!email.includes("@")) return
-        navigate("/")
+        setApiError(null)
+        if (!isValid) return
+
+        setSubmitting(true)
+        try {
+            // navigate 자체는 실패하지 않지만, 실제 API 연동 후에는 이 지점에서 에러가 날 수 있다.
+            navigate("/")
+        } catch {
+            setApiError(isSignup ? "회원가입에 실패했어요. 잠시 후 다시 시도해 주세요." : "로그인에 실패했어요. 잠시 후 다시 시도해 주세요.")
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     return (
@@ -49,7 +78,7 @@ export function Login() {
                     className="pointer-events-none absolute -left-3 top-3 h-14 w-14 rounded-full bg-grad-navy-soft opacity-70"
                 />
                 <h1 className="relative text-[26px] font-bold leading-tight tracking-tight text-ink">
-                    {mode === "로그인" ? "다시 만나서 반가워요" : "안전 운전을 시작해요"}
+                    {isSignup ? "안전 운전을 시작해요" : "다시 만나서 반가워요"}
                 </h1>
             </div>
 
@@ -66,16 +95,19 @@ export function Login() {
                     error={emailError}
                     placeholder="name@example.com"
                     autoComplete="email"
+                    disabled={submitting}
                 />
 
-                {mode === "회원가입" ? (
+                {isSignup ? (
                     <>
                         <Input
                             label="이름"
                             value={name}
                             onChange={(event) => setName(event.target.value)}
+                            error={nameError}
                             placeholder="이름을 입력하세요"
                             autoComplete="name"
+                            disabled={submitting}
                         />
 
                         <Input
@@ -83,6 +115,8 @@ export function Login() {
                             type="date"
                             value={birthDate}
                             onChange={(event) => setBirthDate(event.target.value)}
+                            error={birthDateError}
+                            disabled={submitting}
                         />
 
                         <Input
@@ -90,6 +124,8 @@ export function Login() {
                             type="date"
                             value={licenseIssueDate}
                             onChange={(event) => setLicenseIssueDate(event.target.value)}
+                            error={licenseIssueDateError}
+                            disabled={submitting}
                         />
 
                         <div className="mt-1">
@@ -105,8 +141,14 @@ export function Login() {
                 ) : null}
             </div>
 
-            <Button size="lg" fullWidth className="mt-8" onClick={submit}>
-                {mode}
+            {apiError ? (
+                <p role="alert" className="mt-4 rounded-btn border border-danger/30 bg-danger-tint px-3.5 py-2.5 text-[13px] font-medium text-danger">
+                    {apiError}
+                </p>
+            ) : null}
+
+            <Button size="lg" fullWidth className="mt-8" disabled={submitting} onClick={submit}>
+                {submitting ? "처리 중..." : mode}
             </Button>
         </main>
     )
