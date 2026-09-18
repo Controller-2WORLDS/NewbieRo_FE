@@ -155,8 +155,9 @@ export function Login() {
 
     return (
         <main className="flex h-full min-h-0 flex-col overflow-y-auto no-scrollbar px-5 pb-8">
-            <header className="sticky top-0 z-20 -mx-5 flex h-14 items-center border-b border-line-soft bg-grad-header px-5 shadow-card backdrop-blur-xl">
-                <img src="/Logo.svg" alt="뉴비로" className="h-10 w-10 mt-3" />
+            <header className="sticky top-0 z-20 -mx-5 flex h-14 items-center gap-2 border-b border-line-soft bg-grad-header px-5 shadow-card backdrop-blur-xl">
+                <img src="/Logo.svg" alt="" className="h-8 w-8" />
+                <p className="text-[17px] font-bold tracking-tight text-navy">뉴비로</p>
             </header>
 
             <div className="relative -mx-5 overflow-hidden px-5 pb-3 pt-6">
