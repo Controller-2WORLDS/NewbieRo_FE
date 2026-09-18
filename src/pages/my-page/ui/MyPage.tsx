@@ -1,14 +1,12 @@
 import { useNavigate } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import { ChevronRightIcon, MoonIcon, SunIcon } from "lucide-react"
-import { Card } from "../components/ui/Card"
-import { StatCard } from "../components/ui/StatCard"
-import { RiskBadge } from "../components/ui/RiskBadge"
-import { TrendChart } from "../components/charts/TrendChart"
-import { RouteHistoryItem } from "../components/RouteHistoryItem"
-import { profile, routeHistory, userStats } from "../data/safero"
-import { readStoredDriverType, riskLevel } from "../utils/newbiero"
-import { useTheme } from "../contexts/ThemeContext"
+import { Card, StatCard } from "@shared/ui"
+import { riskLevel } from "@shared/lib/risk"
+import { RiskBadge, RouteHistoryItem } from "@entities/route"
+import { TrendChart, readStoredDriverType } from "@entities/user"
+import { profile, routeHistory, userStats } from "@mocks/safero"
+import { useTheme } from "@app/providers/ThemeProvider"
 
 export function MyPage() {
     const navigate = useNavigate()

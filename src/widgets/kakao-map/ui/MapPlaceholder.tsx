@@ -1,8 +1,8 @@
 import React from "react"
 import { MinusIcon, PlusIcon } from "lucide-react"
 import { Map, Polyline, Circle, useKakaoLoader } from "react-kakao-maps-sdk"
-import { KAKAO_MAP_APP_KEY, type LatLng } from "../../lib/kakao"
-import { cn } from "../../lib/cn"
+import { KAKAO_MAP_APP_KEY, type LatLng } from "@shared/api/kakao"
+import { cn } from "@shared/lib/cn"
 
 interface HeatSpot {
     position: LatLng

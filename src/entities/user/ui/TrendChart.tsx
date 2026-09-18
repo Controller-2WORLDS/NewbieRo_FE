@@ -1,7 +1,7 @@
 import React from "react"
 import { motion } from "framer-motion"
-import type { TrendPoint } from "../../types/newbiero"
-import { formatShortDate } from "../../utils/newbiero"
+import type { TrendPoint } from "../model/types"
+import { formatShortDate } from "@shared/lib/date"
 
 interface TrendChartProps {
     trend: TrendPoint[]

@@ -1,13 +1,6 @@
-import type {
-    DriveAlert,
-    RestArea,
-    RiskSegment,
-    RouteCandidate,
-    RouteQuery,
-    TripReport,
-    UserProfile,
-    UserStats,
-} from "../types/newbiero"
+import type { RestArea, RiskSegment, RouteCandidate, RouteQuery } from "@entities/route"
+import type { UserProfile, UserStats } from "@entities/user"
+import type { DriveAlert, TripReport } from "@entities/trip"
 
 export const profile: UserProfile = {
     name: "김서연",

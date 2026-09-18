@@ -2,7 +2,7 @@ import React from "react"
 import { motion } from "framer-motion"
 import { AlertTriangleIcon, MapPinIcon, MoonIcon } from "lucide-react"
 import { CustomOverlayMap } from "react-kakao-maps-sdk"
-import type { LatLng } from "../../lib/kakao"
+import type { LatLng } from "@shared/api/kakao"
 
 type MarkerKind = "risk" | "rest" | "place"
 

@@ -2,9 +2,9 @@ import React from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowRightIcon, ChevronLeftIcon, ClockIcon, MapPinIcon, SearchIcon, XIcon } from "lucide-react"
 import { useKakaoLoader } from "react-kakao-maps-sdk"
-import { recentQueries } from "../data/safero"
-import { formatDateTime } from "../utils/newbiero"
-import { KAKAO_MAP_APP_KEY, searchPlacesByKeyword, type PlaceSearchResult } from "../lib/kakao"
+import { recentQueries } from "@mocks/safero"
+import { formatDateTime } from "@shared/lib/date"
+import { KAKAO_MAP_APP_KEY, searchPlacesByKeyword, type PlaceSearchResult } from "@shared/api/kakao"
 
 export function PlaceSearch() {
     const navigate = useNavigate()

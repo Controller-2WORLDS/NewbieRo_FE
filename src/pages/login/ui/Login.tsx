@@ -1,10 +1,8 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { NavigationIcon } from "lucide-react"
-import { Button } from "../components/ui/Button"
-import { Input } from "../components/ui/Input"
-import { SegmentedControl } from "../components/ui/SegmentedControl"
-import type { DriverType } from "../types/newbiero"
+import { Button, Input, SegmentedControl } from "@shared/ui"
+import type { DriverType } from "@entities/user"
 
 const modes = ["로그인", "회원가입"] as const
 type Mode = (typeof modes)[number]

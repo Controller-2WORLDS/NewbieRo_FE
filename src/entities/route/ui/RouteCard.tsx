@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
-import type { RouteCandidate } from "../types/newbiero"
-import { formatDistance, formatDuration } from "../utils/newbiero"
-import { RiskBadge } from "./ui/RiskBadge"
+import type { RouteCandidate } from "../model/types"
+import { formatDistance, formatDuration } from "../lib/format"
+import { RiskBadge } from "./RiskBadge"
 
 interface RouteCardProps {
     route: RouteCandidate

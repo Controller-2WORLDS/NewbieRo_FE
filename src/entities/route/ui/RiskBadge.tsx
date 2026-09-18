@@ -1,5 +1,4 @@
-import type { RiskLevel } from "../../types/newbiero"
-import { riskLevel } from "../../utils/newbiero"
+import { riskLevel, type RiskLevel } from "@shared/lib/risk"
 
 interface RiskBadgeProps {
     score?: number

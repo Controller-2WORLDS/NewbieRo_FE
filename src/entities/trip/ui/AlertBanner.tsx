@@ -1,7 +1,6 @@
 import { motion } from "framer-motion"
 import { AlertTriangleIcon } from "lucide-react"
-import type { RiskLevel } from "../../types/newbiero"
-import { riskLevel } from "../../utils/newbiero"
+import { riskLevel, type RiskLevel } from "@shared/lib/risk"
 
 interface AlertBannerProps {
     road_name: string

@@ -1,15 +1,11 @@
 import React from "react"
 import { AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { ScreenHeader } from "../components/ScreenHeader"
-import { MapPlaceholder } from "../components/map/MapPlaceholder"
-import { MapMarker } from "../components/map/MapMarker"
-import { MapTooltip } from "../components/map/MapTooltip"
-import { SeverityChart } from "../components/charts/SeverityChart"
-import { CongestionBadge } from "../components/ui/CongestionBadge"
-import { Button } from "../components/ui/Button"
-import { Card } from "../components/ui/Card"
-import { restAreas, riskSegments } from "../data/safero"
+import { ScreenHeader } from "@widgets/screen-header"
+import { MapPlaceholder, MapMarker, MapTooltip } from "@widgets/kakao-map"
+import { SeverityChart, CongestionBadge } from "@entities/route"
+import { Button, Card } from "@shared/ui"
+import { restAreas, riskSegments } from "@mocks/safero"
 
 const mapBounds = [...riskSegments.map((segment) => segment), restAreas[0]]
 

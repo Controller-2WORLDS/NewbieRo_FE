@@ -1,5 +1,5 @@
-import type { CongestionLevel } from "../../types/newbiero"
-import { congestionLevel } from "../../utils/newbiero"
+import type { CongestionLevel } from "../model/types"
+import { congestionLevel } from "../lib/format"
 
 interface CongestionBadgeProps {
     rate?: number

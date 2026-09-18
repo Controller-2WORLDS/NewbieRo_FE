@@ -1,12 +1,9 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { ScreenHeader } from "../components/ScreenHeader"
-import { Button } from "../components/ui/Button"
-import { Input } from "../components/ui/Input"
-import { SegmentedControl } from "../components/ui/SegmentedControl"
-import { profile } from "../data/safero"
-import type { DriverType } from "../types/newbiero"
-import { readStoredDriverType, storeDriverType } from "../utils/newbiero"
+import { ScreenHeader } from "@widgets/screen-header"
+import { Button, Input, SegmentedControl } from "@shared/ui"
+import { profile } from "@mocks/safero"
+import { readStoredDriverType, storeDriverType, type DriverType } from "@entities/user"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
 

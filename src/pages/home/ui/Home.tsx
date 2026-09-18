@@ -1,18 +1,11 @@
 import React from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { CrosshairIcon, NavigationIcon, SearchIcon } from "lucide-react"
-import { MapPlaceholder } from "../components/map/MapPlaceholder"
-import { CurrentLocationMarker } from "../components/map/CurrentLocationMarker"
-import { MapMarker } from "../components/map/MapMarker"
-import { BottomSheet } from "../components/ui/BottomSheet"
-import { Button } from "../components/ui/Button"
-import { Input } from "../components/ui/Input"
-import { Modal } from "../components/ui/Modal"
-import { SegmentedControl } from "../components/ui/SegmentedControl"
-import { profile } from "../data/safero"
-import type { DriverType } from "../types/newbiero"
-import { readStoredDriverType } from "../utils/newbiero"
-import { getCurrentPosition, getGeolocationPermissionState, reverseGeocode, type LatLng } from "../lib/kakao"
+import { MapPlaceholder, CurrentLocationMarker, MapMarker } from "@widgets/kakao-map"
+import { BottomSheet, Button, Input, Modal, SegmentedControl } from "@shared/ui"
+import { profile } from "@mocks/safero"
+import { readStoredDriverType, type DriverType } from "@entities/user"
+import { getCurrentPosition, getGeolocationPermissionState, reverseGeocode, type LatLng } from "@shared/api/kakao"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
 

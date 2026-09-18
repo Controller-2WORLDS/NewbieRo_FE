@@ -1,12 +1,10 @@
 import { useNavigate } from "react-router-dom"
-import { ScreenHeader } from "../components/ScreenHeader"
-import { Card } from "../components/ui/Card"
-import { StatCard } from "../components/ui/StatCard"
-import { RiskBadge } from "../components/ui/RiskBadge"
-import { Button } from "../components/ui/Button"
-import { MiniMap } from "../components/MiniMap"
-import { tripReport } from "../data/safero"
-import { formatDateTime, riskLevel } from "../utils/newbiero"
+import { ScreenHeader } from "@widgets/screen-header"
+import { Card, StatCard, Button } from "@shared/ui"
+import { formatDateTime } from "@shared/lib/date"
+import { riskLevel } from "@shared/lib/risk"
+import { RiskBadge, MiniMap } from "@entities/route"
+import { tripReport } from "@mocks/safero"
 
 export function TripReport() {
     const navigate = useNavigate()

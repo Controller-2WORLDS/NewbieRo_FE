@@ -1,4 +1,4 @@
-import type { RiskLevel } from "../types/newbiero"
+import type { RiskLevel } from "@shared/lib/risk"
 
 interface MiniMapProps {
     level: RiskLevel

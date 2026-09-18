@@ -1,6 +1,6 @@
 import { ArrowRightIcon, ChevronRightIcon } from "lucide-react"
-import type { RouteQuery } from "../types/newbiero"
-import { formatDateTime } from "../utils/newbiero"
+import type { RouteQuery } from "../model/types"
+import { formatDateTime } from "@shared/lib/date"
 
 interface RouteHistoryItemProps {
     query: RouteQuery

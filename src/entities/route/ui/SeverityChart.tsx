@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
-import type { RiskSegment } from "../../types/newbiero"
-import { riskLevel } from "../../utils/newbiero"
+import type { RiskSegment } from "../model/types"
+import { riskLevel } from "@shared/lib/risk"
 
 interface SeverityChartProps {
     segments: RiskSegment[]

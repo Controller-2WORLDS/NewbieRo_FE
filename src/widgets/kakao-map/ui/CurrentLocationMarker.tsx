@@ -1,5 +1,5 @@
 import { CustomOverlayMap } from "react-kakao-maps-sdk"
-import type { LatLng } from "../../lib/kakao"
+import type { LatLng } from "@shared/api/kakao"
 
 interface CurrentLocationMarkerProps {
     position: LatLng
