@@ -81,6 +81,17 @@ export function reverseGeocode(position: LatLng): Promise<ReverseGeocodeResult |
     })
 }
 
+/** 위치 권한 상태를 확인한다. Permissions API를 지원하지 않는 브라우저(구형 Safari 등)는 "unsupported"로 취급한다. */
+export async function getGeolocationPermissionState(): Promise<PermissionState | "unsupported"> {
+    if (!navigator.permissions) return "unsupported"
+    try {
+        const status = await navigator.permissions.query({ name: "geolocation" })
+        return status.state
+    } catch {
+        return "unsupported"
+    }
+}
+
 /** Wraps the browser Geolocation API in a promise. Rejects if unsupported or denied. */
 export function getCurrentPosition(): Promise<LatLng> {
     return new Promise((resolve, reject) => {

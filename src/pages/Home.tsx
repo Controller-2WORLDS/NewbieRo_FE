@@ -7,16 +7,20 @@ import { MapMarker } from "../components/map/MapMarker"
 import { BottomSheet } from "../components/ui/BottomSheet"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
+import { Modal } from "../components/ui/Modal"
 import { SegmentedControl } from "../components/ui/SegmentedControl"
 import { profile } from "../data/safero"
 import type { DriverType } from "../types/newbiero"
 import { readStoredDriverType } from "../utils/newbiero"
-import { getCurrentPosition, reverseGeocode, type LatLng } from "../lib/kakao"
+import { getCurrentPosition, getGeolocationPermissionState, reverseGeocode, type LatLng } from "../lib/kakao"
 
 const driverTypes: readonly DriverType[] = ["초보", "고령", "일반"]
 
 /** 위치 권한이 없거나 실패했을 때의 기본 중심(서울시청). */
 const DEFAULT_CENTER: LatLng = { lat: 37.5665, lng: 126.978 }
+
+/** 앱을 새로 시작할 때(세션당 한 번)만 위치 권한 안내를 띄우기 위한 플래그. */
+const LOCATION_PROMPT_SEEN_KEY = "newbiero:location-prompt-seen"
 
 interface PlaceSelection {
     origin?: string
@@ -37,13 +41,56 @@ export function Home() {
     const [currentPosition, setCurrentPosition] = React.useState<LatLng | null>(null)
     const [driverType, setDriverType] = React.useState<DriverType>(() => readStoredDriverType() ?? profile.driver_type)
     const [sheetOpen, setSheetOpen] = React.useState(Boolean(selection?.destination))
+    const [locationPromptOpen, setLocationPromptOpen] = React.useState(false)
+    const [locationDenied, setLocationDenied] = React.useState(false)
     const mapRef = React.useRef<kakao.maps.Map | null>(null)
 
     React.useEffect(() => {
-        getCurrentPosition()
-            .then(setCurrentPosition)
-            .catch(() => setCurrentPosition(null))
+        let cancelled = false
+
+        const requestPosition = () => {
+            getCurrentPosition()
+                .then((position) => {
+                    if (!cancelled) setCurrentPosition(position)
+                })
+                .catch(() => {
+                    if (!cancelled) setCurrentPosition(null)
+                })
+        }
+
+        getGeolocationPermissionState().then((state) => {
+            if (cancelled) return
+
+            if (state === "granted") {
+                requestPosition()
+                return
+            }
+
+            setLocationDenied(state === "denied")
+
+            // 세션당 한 번만 안내를 띄우고, 이미 봤다면 브라우저 기본 동작에 맡긴다.
+            if (sessionStorage.getItem(LOCATION_PROMPT_SEEN_KEY)) {
+                requestPosition()
+                return
+            }
+            sessionStorage.setItem(LOCATION_PROMPT_SEEN_KEY, "1")
+            setLocationPromptOpen(true)
+        })
+
+        return () => {
+            cancelled = true
+        }
     }, [])
+
+    const requestLocationAccess = () => {
+        getCurrentPosition()
+            .then((position) => {
+                setCurrentPosition(position)
+                setLocationDenied(false)
+                setLocationPromptOpen(false)
+            })
+            .catch(() => setLocationDenied(true))
+    }
 
     React.useEffect(() => {
         if (!selection?.destination) return
@@ -168,6 +215,39 @@ export function Home() {
                     </Button>
                 </div>
             </BottomSheet>
+
+            <Modal
+                open={locationPromptOpen}
+                onClose={() => setLocationPromptOpen(false)}
+                title="위치 권한이 필요해요"
+                footer={
+                    locationDenied ? (
+                        <Button size="lg" fullWidth onClick={() => setLocationPromptOpen(false)}>
+                            확인
+                        </Button>
+                    ) : (
+                        <div className="flex gap-2.5">
+                            <Button
+                                variant="secondary"
+                                size="lg"
+                                fullWidth
+                                onClick={() => setLocationPromptOpen(false)}
+                            >
+                                나중에
+                            </Button>
+                            <Button size="lg" fullWidth onClick={requestLocationAccess}>
+                                위치 허용하기
+                            </Button>
+                        </div>
+                    )
+                }
+            >
+                <p className="text-[15px] leading-relaxed text-ink-2">
+                    {locationDenied
+                        ? "위치 접근이 차단되어 있어요. 브라우저 설정에서 뉴비로의 위치 권한을 허용한 뒤 다시 시도해 주세요."
+                        : "현재 위치를 기반으로 실시간 안전 경로와 위험구간 알림을 제공하려면 위치 권한이 필요해요."}
+                </p>
+            </Modal>
         </div>
     )
 }
