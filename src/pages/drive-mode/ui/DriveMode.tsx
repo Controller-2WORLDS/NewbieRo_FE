@@ -1,22 +1,57 @@
 import React from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { MoonIcon, XIcon } from "lucide-react"
 import { MapPlaceholder, MapMarker, CurrentLocationMarker } from "@widgets/kakao-map"
-import { AlertBanner } from "@entities/trip"
-import { CongestionBadge } from "@entities/route"
+import { AlertBanner, useCreateDrivingReport } from "@entities/trip"
+import {
+    RestAreaCongestionBadge,
+    toRestArea,
+    toRiskSegment,
+    useRestAreas,
+    useRiskSegments,
+    useRoute,
+} from "@entities/route"
 import { Button, Modal } from "@shared/ui"
-import { approachingRestArea, driveAlert, riskSegments } from "@mocks/safero"
+import { buildBboxAround, findNearestWithin } from "@shared/lib"
 import { getCurrentPosition, type LatLng } from "@shared/api/kakao"
 
 /** 위치 권한이 없거나 실패했을 때의 기본 중심(서울시청). */
 const DEFAULT_CENTER: LatLng = { lat: 37.5665, lng: 126.978 }
+/** 현재 위치에서 이 거리(m) 안에 있는 위험구간/졸음쉼터만 알림으로 보여준다. */
+const ALERT_RADIUS_M = 3000
+const REST_AREA_RADIUS_M = 5000
+
+interface DriveModeState {
+    routeId?: string
+}
 
 export function DriveMode() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const state = (location.state ?? null) as DriveModeState | null
+    const routeId = state?.routeId
+
     const [restAreaVisible, setRestAreaVisible] = React.useState(false)
     const [endConfirmOpen, setEndConfirmOpen] = React.useState(false)
     const [currentPosition, setCurrentPosition] = React.useState<LatLng | null>(null)
+
+    const createReport = useCreateDrivingReport()
+    const { data: route } = useRoute(routeId)
+    const bbox = route ? buildBboxAround([route.origin, route.destination]) : undefined
+    const { data: riskSegmentsData } = useRiskSegments({ bbox })
+    const { data: restAreasData } = useRestAreas({ route_id: routeId })
+
+    const riskSegments = (riskSegmentsData?.segments ?? [])
+        .map(toRiskSegment)
+        .filter((segment): segment is NonNullable<typeof segment> => segment !== null)
+    const restAreas = (restAreasData?.rest_areas ?? [])
+        .map(toRestArea)
+        .filter((restArea): restArea is NonNullable<typeof restArea> => restArea !== null)
+
+    const position = currentPosition ?? DEFAULT_CENTER
+    const nearestRiskSegment = findNearestWithin(position, riskSegments, ALERT_RADIUS_M)
+    const nearestRestArea = findNearestWithin(position, restAreas, REST_AREA_RADIUS_M)
 
     React.useEffect(() => {
         getCurrentPosition()
@@ -25,15 +60,33 @@ export function DriveMode() {
     }, [])
 
     React.useEffect(() => {
+        if (!nearestRestArea) return
         const showTimer = window.setTimeout(() => setRestAreaVisible(true), 2600)
         return () => window.clearTimeout(showTimer)
-    }, [])
+    }, [nearestRestArea])
 
     React.useEffect(() => {
         if (!restAreaVisible) return
         const hideTimer = window.setTimeout(() => setRestAreaVisible(false), 7000)
         return () => window.clearTimeout(hideTimer)
     }, [restAreaVisible])
+
+    const endDrive = async () => {
+        if (!routeId) {
+            navigate("/")
+            return
+        }
+        try {
+            const report = await createReport.mutateAsync({
+                route_id: routeId,
+                driven_at: new Date().toISOString(),
+            })
+            navigate("/report", { state: { reportId: report.report_id } })
+        } catch {
+            // 리포트 생성 실패(이미 종료된 경로 등)는 홈으로 돌려보내는 것으로 처리한다.
+            navigate("/")
+        }
+    }
 
     return (
         <div className="relative flex h-full min-h-0 flex-col">
@@ -42,18 +95,22 @@ export function DriveMode() {
                 center={currentPosition ?? DEFAULT_CENTER}
                 level={3}
                 routePath={
-                    currentPosition ? [currentPosition, riskSegments[0], approachingRestArea] : undefined
+                    currentPosition && nearestRestArea ? [currentPosition, nearestRestArea] : undefined
                 }
                 label="주행 중 실시간 위치 지도"
             >
-                <MapMarker kind="risk" position={riskSegments[0]} label={`위험구간 ${riskSegments[0].road_name}`} />
+                {nearestRiskSegment ? (
+                    <MapMarker kind="risk" position={nearestRiskSegment} label={`위험구간 ${nearestRiskSegment.road_name}`} />
+                ) : null}
 
-                <MapMarker
-                    kind="rest"
-                    position={approachingRestArea}
-                    delay={0.06}
-                    label={`졸음쉼터 ${approachingRestArea.rest_area_name}`}
-                />
+                {nearestRestArea ? (
+                    <MapMarker
+                        kind="rest"
+                        position={nearestRestArea}
+                        delay={0.06}
+                        label={`졸음쉼터 ${nearestRestArea.rest_area_name}`}
+                    />
+                ) : null}
 
                 <CurrentLocationMarker position={currentPosition ?? DEFAULT_CENTER} variant="puck" />
             </MapPlaceholder>
@@ -61,11 +118,13 @@ export function DriveMode() {
             <div className="relative z-20 flex h-full min-h-0 flex-col p-4">
                 <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
-                        <AlertBanner
-                            road_name={driveAlert.road_name}
-                            severity_score={driveAlert.severity_score}
-                            alert_type={driveAlert.alert_type}
-                        />
+                        {nearestRiskSegment ? (
+                            <AlertBanner
+                                road_name={nearestRiskSegment.road_name}
+                                severity_score={nearestRiskSegment.severity_score}
+                                alert_type="사고다발구간"
+                            />
+                        ) : null}
                     </div>
                     <button
                         type="button"
@@ -79,7 +138,7 @@ export function DriveMode() {
 
                 <div className="mt-auto">
                     <AnimatePresence>
-                        {restAreaVisible ? (
+                        {restAreaVisible && nearestRestArea ? (
                             <motion.div
                                 role="status"
                                 initial={{ y: 12, opacity: 0 }}
@@ -95,9 +154,9 @@ export function DriveMode() {
                                 />
 
                                 <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-ink">
-                                    {approachingRestArea.rest_area_name}
+                                    {nearestRestArea.rest_area_name}
                                 </span>
-                                <CongestionBadge rate={approachingRestArea.predicted_occupancy_rate} />
+                                <RestAreaCongestionBadge restAreaId={nearestRestArea.rest_area_id} />
 
                                 <button
                                     type="button"
@@ -122,8 +181,8 @@ export function DriveMode() {
                         <Button variant="secondary" size="lg" fullWidth onClick={() => setEndConfirmOpen(false)}>
                             계속 주행
                         </Button>
-                        <Button size="lg" fullWidth onClick={() => navigate("/report")}>
-                            종료
+                        <Button size="lg" fullWidth disabled={createReport.isPending} onClick={endDrive}>
+                            {createReport.isPending ? "종료하는 중..." : "종료"}
                         </Button>
                     </div>
                 }
